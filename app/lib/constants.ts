@@ -510,10 +510,11 @@ export const stsBedrockConfig: StsConfig = {
               type: "aws_bedrock", 
               model: "us.amazon.nova-pro-v1:0", 
               credentials: { 
-                type: "iam", 
+                type: "iam",  // or "sts" if using AWS STS
                 region: "us-east-2", 
                 access_key_id: "<YOUR_AWS_ACCESS_KEY_ID>", 
-                secret_access_key: "<YOUR_AWS_SECRET_ACCESS_KEY>" 
+                secret_access_key: "<YOUR_AWS_SECRET_ACCESS_KEY>"
+                // session_token: "<YOUR_AWS_SESSION_TOKEN>" if using "sts"
               }
             },
             endpoint: {

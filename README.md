@@ -68,6 +68,8 @@ Before you begin, ensure you have the following:
    secret_access_key: "YOUR_AWS_SECRET_ACCESS_KEY" 
    ```
 
+   (If using STS, you need to add and uncomment `session_token` and change `type` from `iam` to `sts`. [Documentation here](https://developers.deepgram.com/reference/voice-agent-api/agent#send.sendSettings.agent.think.provider.ChannelsAgentMessagesSettingsAgentThinkProvider1.credentials))
+
 5. **Start the Development Server**
    ```bash
    npm run dev
