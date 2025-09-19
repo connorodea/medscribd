@@ -42,7 +42,7 @@ Before you begin, ensure you have the following:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/lawrence-deepgram/Medical-Assistant-Voice-Agent.git
+   git clone https://github.com/deepgram-devs/Medical-Assistant-Voice-Agent.git
    cd medical-assistant-voice-agent
    ```
 
