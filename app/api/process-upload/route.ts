@@ -62,7 +62,7 @@ WHAT TO EXCLUDE:
 - Redundant information
 - Protected health information that isn't clinically relevant
 - Personal opinions or judgments
-- Information the provider explicitly states is \"off the record\"
+- Information the provider explicitly states is "off the record"
 
 FORMATTING:
 - Structure the note according to the requested note_type (e.g., SOAP format, dental charting format, progress note format)
