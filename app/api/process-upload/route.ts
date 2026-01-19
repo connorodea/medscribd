@@ -199,6 +199,28 @@ const tryParseJson = (input: string) => {
   }
 };
 
+const parseTaggedResponse = (input: string) => {
+  const noteMatch = input.match(/<clinical_note>([\s\S]*?)<\/clinical_note>/i);
+  if (!noteMatch?.[1]) return null;
+  const verificationMatch = input.match(
+    /<verification_needed>([\s\S]*?)<\/verification_needed>/i,
+  );
+  const note = noteMatch[1].trim();
+  const verificationRaw = verificationMatch?.[1]?.trim() || "";
+  const verification = verificationRaw
+    ? verificationRaw
+        .split("\n")
+        .map((line) => line.replace(/^[-*•\s]+/, "").trim())
+        .filter(Boolean)
+    : [];
+  return {
+    clinical_note: note,
+    verification_needed: verification,
+    icd10: [],
+    cpt: [],
+  };
+};
+
 const parseJsonResponse = (content: string | Record<string, unknown>) => {
   const parsed =
     typeof content === "string"
@@ -349,6 +371,18 @@ const runAnthropic = async (transcript: string, patientContext: string, noteType
     return parseJsonResponse(content);
   } catch (error) {
     if (typeof content === "string") {
+      const tagged = parseTaggedResponse(content);
+      if (tagged) {
+        console.warn("Anthropic response fell back to tagged extraction.");
+        return {
+          clinical_note: tagged.clinical_note,
+          verification_needed: tagged.verification_needed || [],
+          soap: null,
+          icd10: tagged.icd10 || [],
+          cpt: tagged.cpt || [],
+          warning: "Anthropic response was not JSON. Parsed tagged output instead.",
+        };
+      }
       console.error("Anthropic invalid JSON response preview:", sanitizePreview(content));
     }
     throw new Error("Anthropic response was not valid JSON.");
