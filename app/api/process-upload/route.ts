@@ -384,6 +384,14 @@ const runAnthropic = async (transcript: string, patientContext: string, noteType
         };
       }
       console.error("Anthropic invalid JSON response preview:", sanitizePreview(content));
+      return {
+        clinical_note: content.trim(),
+        verification_needed: [],
+        soap: null,
+        icd10: [],
+        cpt: [],
+        warning: "Anthropic response was not JSON. Returned raw text instead.",
+      };
     }
     throw new Error("Anthropic response was not valid JSON.");
   }
