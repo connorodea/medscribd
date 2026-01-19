@@ -20,6 +20,77 @@ type CodeSuggestion = {
 const getUploadDir = () =>
   process.env.UPLOAD_DIR || path.join(process.cwd(), "uploads");
 
+const promptTemplate = `You are an AI medical scribe assistant for medscribd.com. Your role is to help healthcare providers (doctors and dentists) by converting clinical conversations into accurate, well-structured clinical documentation. You will listen to transcripts of patient encounters and generate professional medical notes.
+
+Here is the patient context and appointment information:
+<patient_context>
+{{PATIENT_CONTEXT}}
+</patient_context>
+
+Here is the type of clinical note requested:
+<note_type>
+{{NOTE_TYPE}}
+</note_type>
+
+Here is the transcript of the clinical encounter:
+<audio_transcript>
+{{AUDIO_TRANSCRIPT}}
+</audio_transcript>
+
+Your task is to create a professional clinical note based on the conversation transcript. Follow these guidelines:
+
+DOCUMENTATION STANDARDS:
+- Use clear, concise, professional medical language
+- Include only clinically relevant information from the conversation
+- Organize information logically according to the requested note type
+- Use standard medical abbreviations appropriately
+- Maintain objectivity; distinguish between patient-reported symptoms and clinical observations
+- Include relevant positive and negative findings
+- Document the provider's clinical reasoning, assessment, and plan
+
+WHAT TO INCLUDE:
+- Chief complaint and history of present illness
+- Relevant medical history, medications, and allergies mentioned
+- Physical examination findings discussed
+- Assessment and differential diagnosis
+- Treatment plan, prescriptions, and follow-up instructions
+- Patient education provided
+- Any procedures performed or ordered
+
+WHAT TO EXCLUDE:
+- Off-topic conversations or small talk
+- Redundant information
+- Protected health information that isn't clinically relevant
+- Personal opinions or judgments
+- Information the provider explicitly states is \"off the record\"
+
+FORMATTING:
+- Structure the note according to the requested note_type (e.g., SOAP format, dental charting format, progress note format)
+- Use appropriate headings and sections
+- Present information in a logical flow
+- Use bullet points or numbered lists where appropriate for clarity
+
+IMPORTANT LIMITATIONS:
+- You are an assistant tool only; all notes must be reviewed and approved by the licensed healthcare provider
+- Do not add clinical information, diagnoses, or recommendations that were not discussed in the encounter
+- If critical information seems missing, note this in your output
+- If you're uncertain about medical terminology or what was said, indicate this clearly
+
+Before writing the note, use the scratchpad to organize the key information:
+
+<scratchpad>
+- Identify the chief complaint
+- Extract key history elements
+- Note examination findings
+- Identify the assessment/diagnosis
+- Extract the treatment plan
+- Note any follow-up instructions
+</scratchpad>
+
+Now write the clinical note inside <clinical_note> tags. After the note, if there are any ambiguities, missing information, or items requiring provider verification, list them inside <verification_needed> tags.
+
+Begin your response now.`;
+
 const templates = {
   primary_care: {
     name: "Primary Care",
@@ -48,29 +119,50 @@ const templates = {
   },
 };
 
-const buildPrompt = (transcript: string, templateId: keyof typeof templates) => {
-  const template = templates[templateId] || templates.primary_care;
-  return `You are a medical scribe. Generate a SOAP note and coding suggestions.
-Template focus: ${template.name} - ${template.focus}
+const renderPrompt = (values: {
+  patientContext: string;
+  noteType: string;
+  transcript: string;
+}) =>
+  promptTemplate
+    .replace("{{PATIENT_CONTEXT}}", values.patientContext || "Not provided.")
+    .replace("{{NOTE_TYPE}}", values.noteType || "SOAP Note")
+    .replace("{{AUDIO_TRANSCRIPT}}", values.transcript || "");
 
-Return ONLY valid JSON in this shape:
-{
-  "soap": {
-    "subjective": "...",
-    "objective": "...",
-    "assessment": "...",
-    "plan": "..."
+const jsonSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    clinical_note: { type: "string" },
+    verification_needed: { type: "array", items: { type: "string" } },
+    icd10: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          code: { type: "string" },
+          description: { type: "string" },
+          confidence: { type: "string", enum: ["low", "medium", "high"] },
+        },
+        required: ["code", "description", "confidence"],
+      },
+    },
+    cpt: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          code: { type: "string" },
+          description: { type: "string" },
+          confidence: { type: "string", enum: ["low", "medium", "high"] },
+        },
+        required: ["code", "description", "confidence"],
+      },
+    },
   },
-  "icd10": [
-    {"code":"", "description":"", "confidence":"low|medium|high"}
-  ],
-  "cpt": [
-    {"code":"", "description":"", "confidence":"low|medium|high"}
-  ]
-}
-
-Transcript:
-${transcript}`;
+  required: ["clinical_note", "verification_needed", "icd10", "cpt"],
 };
 
 const transcribeAudio = async (audioBuffer: Buffer) => {
@@ -102,11 +194,15 @@ const transcribeAudio = async (audioBuffer: Buffer) => {
 
 const parseJsonResponse = (content: string) => {
   const parsed = JSON.parse(content) as {
-    soap: SoapNote;
+    clinical_note?: string;
+    verification_needed?: string[];
+    soap?: SoapNote;
     icd10: CodeSuggestion[];
     cpt: CodeSuggestion[];
   };
   return {
+    clinical_note: parsed.clinical_note || "",
+    verification_needed: parsed.verification_needed || [],
     soap: parsed.soap,
     icd10: parsed.icd10 || [],
     cpt: parsed.cpt || [],
@@ -114,17 +210,26 @@ const parseJsonResponse = (content: string) => {
   };
 };
 
-const runOpenAi = async (transcript: string, templateId: keyof typeof templates) => {
+const runOpenAi = async (
+  transcript: string,
+  templateId: keyof typeof templates,
+  patientContext: string,
+  noteType: string,
+) => {
   const apiKey = process.env.OPENAI_API_KEY;
   const model = process.env.OPENAI_MODEL;
   if (!apiKey || !model) {
     return {
       soap: null,
+      clinical_note: "",
+      verification_needed: [],
       icd10: [],
       cpt: [],
       warning: "OPENAI_API_KEY or OPENAI_MODEL is not configured. Returning transcript only.",
     };
   }
+
+  const prompt = renderPrompt({ patientContext, noteType, transcript });
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -134,10 +239,15 @@ const runOpenAi = async (transcript: string, templateId: keyof typeof templates)
     },
     body: JSON.stringify({
       model,
-      messages: [
-        { role: "system", content: "You output valid JSON only." },
-        { role: "user", content: buildPrompt(transcript, templateId) },
-      ],
+      messages: [{ role: "user", content: prompt }],
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "medscribd_structured_note",
+          strict: true,
+          schema: jsonSchema,
+        },
+      },
       temperature: 0.2,
     }),
   });
@@ -160,30 +270,44 @@ const runOpenAi = async (transcript: string, templateId: keyof typeof templates)
   }
 };
 
-const runAnthropic = async (transcript: string, templateId: keyof typeof templates) => {
+const runAnthropic = async (
+  transcript: string,
+  templateId: keyof typeof templates,
+  patientContext: string,
+  noteType: string,
+) => {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   const model = process.env.ANTHROPIC_MODEL;
   if (!apiKey || !model) {
     return {
       soap: null,
+      clinical_note: "",
+      verification_needed: [],
       icd10: [],
       cpt: [],
       warning: "ANTHROPIC_API_KEY or ANTHROPIC_MODEL is not configured. Returning transcript only.",
     };
   }
 
+  const prompt = renderPrompt({ patientContext, noteType, transcript });
+
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
       "x-api-key": apiKey,
       "anthropic-version": "2023-06-01",
+      "anthropic-beta": "structured-outputs-2025-11-13",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
       model,
       max_tokens: 1400,
       temperature: 0.2,
-      messages: [{ role: "user", content: buildPrompt(transcript, templateId) }],
+      messages: [{ role: "user", content: prompt }],
+      output_format: {
+        type: "json_schema",
+        schema: jsonSchema,
+      },
     }),
   });
 
@@ -209,18 +333,22 @@ const runNoteGeneration = async (
   transcript: string,
   templateId: keyof typeof templates,
   provider: string,
+  patientContext: string,
+  noteType: string,
 ) => {
   if (provider === "anthropic") {
-    return runAnthropic(transcript, templateId);
+    return runAnthropic(transcript, templateId, patientContext, noteType);
   }
-  return runOpenAi(transcript, templateId);
+  return runOpenAi(transcript, templateId, patientContext, noteType);
 };
 
 export async function POST(request: NextRequest) {
-  const { storedAs, templateId, provider } = (await request.json()) as {
+  const { storedAs, templateId, provider, patientContext, noteType } = (await request.json()) as {
     storedAs?: string;
     templateId?: string;
     provider?: string;
+    patientContext?: string;
+    noteType?: string;
   };
 
   if (!storedAs) {
@@ -251,11 +379,20 @@ export async function POST(request: NextRequest) {
     ? templateId
     : "primary_care") as keyof typeof templates;
   const selectedProvider = provider || process.env.LLM_PROVIDER || "openai";
-  const generated = await runNoteGeneration(transcript, templateKey, selectedProvider);
+  const resolvedNoteType = noteType || templates[templateKey]?.name || "SOAP Note";
+  const generated = await runNoteGeneration(
+    transcript,
+    templateKey,
+    selectedProvider,
+    patientContext || "",
+    resolvedNoteType,
+  );
 
   return NextResponse.json({
     transcript,
     soap: generated.soap,
+    clinical_note: generated.clinical_note,
+    verification_needed: generated.verification_needed,
     icd10: generated.icd10,
     cpt: generated.cpt,
     provider: selectedProvider,

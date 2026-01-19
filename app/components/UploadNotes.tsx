@@ -25,6 +25,8 @@ type CodeSuggestion = {
 type ProcessResult = {
   transcript: string;
   soap: SoapNote | null;
+  clinical_note?: string;
+  verification_needed?: string[];
   icd10: CodeSuggestion[];
   cpt: CodeSuggestion[];
   warning?: string | null;
@@ -55,6 +57,8 @@ export default function UploadNotes() {
   const [uploaded, setUploaded] = useState<UploadedFile[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>(templates[0].id);
   const [selectedProvider, setSelectedProvider] = useState<string>(providers[0].id);
+  const [patientContext, setPatientContext] = useState("");
+  const [noteType, setNoteType] = useState("SOAP Note");
   const [processing, setProcessing] = useState<Record<string, boolean>>({});
   const [results, setResults] = useState<Record<string, ProcessResult>>({});
 
@@ -100,6 +104,8 @@ export default function UploadNotes() {
           storedAs: file.storedAs,
           templateId: selectedTemplate,
           provider: selectedProvider,
+          patientContext,
+          noteType,
         }),
       });
       if (!response.ok) {
@@ -122,12 +128,12 @@ export default function UploadNotes() {
   return (
     <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-left">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="text-sm font-semibold text-brand-cloud">Upload notes or audio</div>
-          <div className="text-xs text-brand-mist/70">
-            Upload text or audio files to generate a SOAP note and coding suggestions.
+          <div>
+            <div className="text-sm font-semibold text-brand-cloud">Upload notes or audio</div>
+            <div className="text-xs text-brand-mist/70">
+              Upload text or audio files to generate a SOAP note and coding suggestions.
+            </div>
           </div>
-        </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <select
             value={selectedProvider}
@@ -151,6 +157,13 @@ export default function UploadNotes() {
               </option>
             ))}
           </select>
+          <input
+            type="text"
+            value={noteType}
+            onChange={(event) => setNoteType(event.target.value)}
+            placeholder="Note type (e.g., SOAP Note)"
+            className="rounded-full border border-white/10 bg-white/10 px-3 py-2 text-xs text-brand-cloud placeholder:text-brand-mist/50"
+          />
           <label className="inline-flex cursor-pointer items-center rounded-full bg-brand-amber px-4 py-2 text-xs font-semibold text-brand-ink hover:bg-[#f2a94a] transition-colors">
             <input
               type="file"
@@ -163,6 +176,15 @@ export default function UploadNotes() {
             {isUploading ? "Uploading..." : "Upload files"}
           </label>
         </div>
+      </div>
+      <div className="mt-3">
+        <textarea
+          value={patientContext}
+          onChange={(event) => setPatientContext(event.target.value)}
+          placeholder="Patient context or appointment info (optional)"
+          rows={3}
+          className="w-full rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-brand-cloud placeholder:text-brand-mist/50"
+        />
       </div>
       {message && <div className="mt-3 text-xs text-brand-mist/80">{message}</div>}
       {uploaded.length > 0 && (
@@ -188,13 +210,27 @@ export default function UploadNotes() {
                 {result && (
                   <div className="mt-3 space-y-3 text-[11px] text-brand-mist/70">
                     <div className="rounded-lg border border-white/10 bg-[#0b1220] p-3">
-                      <div className="text-brand-cloud font-semibold">SOAP Note</div>
-                      {result.soap ? (
+                      <div className="text-brand-cloud font-semibold">Clinical Note</div>
+                      {result.clinical_note ? (
+                        <pre className="mt-2 whitespace-pre-wrap text-[11px] text-brand-mist/80 font-fira">
+                          {result.clinical_note}
+                        </pre>
+                      ) : result.soap ? (
                         <pre className="mt-2 whitespace-pre-wrap text-[11px] text-brand-mist/80 font-fira">{`S: ${result.soap.subjective}\nO: ${result.soap.objective}\nA: ${result.soap.assessment}\nP: ${result.soap.plan}`}</pre>
                       ) : (
-                        <div className="mt-2">Transcript ready. Configure OPENAI_API_KEY to generate SOAP notes.</div>
+                        <div className="mt-2">Transcript ready. Configure LLM keys to generate notes.</div>
                       )}
                     </div>
+                    {result.verification_needed && result.verification_needed.length > 0 && (
+                      <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                        <div className="text-brand-cloud font-semibold">Verification Needed</div>
+                        <ul className="mt-2 space-y-1">
+                          {result.verification_needed.map((item, index) => (
+                            <li key={`${item}-${index}`}>• {item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div className="rounded-lg border border-white/10 bg-white/5 p-3">
                         <div className="text-brand-cloud font-semibold">ICD-10 Suggestions</div>
