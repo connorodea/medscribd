@@ -367,7 +367,7 @@ export async function POST(request: NextRequest) {
   const templateKey = (templateId && templateId in templates
     ? templateId
     : "primary_care") as keyof typeof templates;
-  const selectedProvider = provider || process.env.LLM_PROVIDER || "openai";
+  const selectedProvider = provider || process.env.LLM_PROVIDER || "anthropic";
   const resolvedNoteType = noteType || templates[templateKey]?.name || "SOAP Note";
   const generated = await runNoteGeneration(
     transcript,

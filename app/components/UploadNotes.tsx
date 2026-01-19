@@ -40,11 +40,6 @@ const templates = [
   { id: "physical_therapy", label: "Physical Therapy" },
 ] as const;
 
-const providers = [
-  { id: "openai", label: "GPT (OpenAI)" },
-  { id: "anthropic", label: "Claude (Anthropic)" },
-] as const;
-
 const formatBytes = (value: number) => {
   if (value < 1024) return `${value} B`;
   if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
@@ -56,7 +51,6 @@ export default function UploadNotes() {
   const [message, setMessage] = useState<string | null>(null);
   const [uploaded, setUploaded] = useState<UploadedFile[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>(templates[0].id);
-  const [selectedProvider, setSelectedProvider] = useState<string>(providers[0].id);
   const [patientContext, setPatientContext] = useState("");
   const [noteType, setNoteType] = useState("SOAP Note");
   const [processing, setProcessing] = useState<Record<string, boolean>>({});
@@ -103,7 +97,6 @@ export default function UploadNotes() {
         body: JSON.stringify({
           storedAs: file.storedAs,
           templateId: selectedTemplate,
-          provider: selectedProvider,
           patientContext,
           noteType,
         }),
@@ -135,17 +128,6 @@ export default function UploadNotes() {
             </div>
           </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <select
-            value={selectedProvider}
-            onChange={(event) => setSelectedProvider(event.target.value)}
-            className="rounded-full border border-white/10 bg-white/10 px-3 py-2 text-xs text-brand-cloud"
-          >
-            {providers.map((provider) => (
-              <option key={provider.id} value={provider.id} className="text-brand-ink">
-                {provider.label}
-              </option>
-            ))}
-          </select>
           <select
             value={selectedTemplate}
             onChange={(event) => setSelectedTemplate(event.target.value)}

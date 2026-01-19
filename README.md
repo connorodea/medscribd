@@ -65,7 +65,7 @@ Before you begin, ensure you have the following:
    export OPENAI_MODEL=gpt-5.2
    export ANTHROPIC_API_KEY=your_anthropic_api_key_here
    export ANTHROPIC_MODEL=sonnet-4.5
-   export LLM_PROVIDER=openai
+   export LLM_PROVIDER=anthropic
    ```
    Or copy the example file:
    ```bash
