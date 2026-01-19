@@ -20,8 +20,8 @@ type ExportPayload = {
 
 const toBuffer = (doc: PDFKit.PDFDocument) =>
   new Promise<Buffer>((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    doc.on("data", (chunk) => chunks.push(chunk));
+    const chunks: Uint8Array[] = [];
+    doc.on("data", (chunk: Uint8Array) => chunks.push(chunk));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
   });
