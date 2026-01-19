@@ -168,10 +168,10 @@ export default function UploadNotes() {
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-left backdrop-blur">
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-left shadow-[0_24px_60px_-40px_rgba(0,0,0,0.6)] backdrop-blur">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <div className="text-xs uppercase tracking-[0.3em] text-brand-mist/70">
+          <div className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-mist/70">
             Upload & Generate
           </div>
           <h2 className="text-lg font-semibold text-brand-cloud">Files & context</h2>

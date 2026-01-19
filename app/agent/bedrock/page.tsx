@@ -70,7 +70,7 @@ export default function PreviewHome() {
   return (
     <main className="min-h-screen">
       <div className="mx-auto w-full max-w-screen-xl px-4 py-8 lg:px-8">
-        <header className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 px-6 py-5 backdrop-blur lg:flex-row lg:items-center lg:justify-between">
+        <header className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 px-6 py-4 backdrop-blur lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
             <Image
               src="/medscribd-logo.png"
@@ -81,16 +81,16 @@ export default function PreviewHome() {
               priority
             />
             <div>
-              <h1 className="text-2xl font-semibold text-brand-cloud font-sora">
-                Clinical notes, captured in real time.
+              <div className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-mist/70">
+                Live Scribe
+              </div>
+              <h1 className="text-xl font-semibold text-brand-cloud font-sora">
+                Clinical notes, captured in real time
               </h1>
-              <p className="text-sm text-brand-mist/70">
-                Speak naturally. medscribd organizes the encounter as you talk.
-              </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-teal/20 text-brand-mist border border-brand-teal/50">
+            <span className="inline-flex items-center rounded-full border border-brand-teal/30 bg-brand-teal/20 px-3 py-1 text-xs font-semibold text-brand-mist">
               Bedrock
             </span>
             <ThemeToggle />
@@ -104,11 +104,11 @@ export default function PreviewHome() {
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <section className="space-y-6">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.6)] backdrop-blur">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <div className="text-xs uppercase tracking-[0.3em] text-brand-mist/70">
-                    Live Capture
+                  <div className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-mist/70">
+                    Capture
                   </div>
                   <h2 className="text-lg font-semibold text-brand-cloud">Ambient scribe</h2>
                 </div>
@@ -124,10 +124,10 @@ export default function PreviewHome() {
                 />
               </Suspense>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.6)] backdrop-blur">
               <div className="mb-4">
-                <div className="text-xs uppercase tracking-[0.3em] text-brand-mist/70">
-                  Structured Notes
+                <div className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-mist/70">
+                  Output
                 </div>
                 <h2 className="text-lg font-semibold text-brand-cloud">Clinical panels</h2>
               </div>
@@ -138,7 +138,7 @@ export default function PreviewHome() {
           </section>
 
           <aside className="space-y-4 lg:sticky lg:top-8 h-fit">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur space-y-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.6)] backdrop-blur space-y-4">
               <Intelligence />
               {!isMobile && (
                 <Suspense fallback={<div>Loading...</div>}>
@@ -146,10 +146,10 @@ export default function PreviewHome() {
                 </Suspense>
               )}
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur space-y-2">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.6)] backdrop-blur space-y-2">
               <button
                 onClick={toggleConversation}
-                className={`flex w-full items-center justify-between gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                className={`flex w-full items-center justify-between gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                   conversationOpen
                     ? "bg-gray-800 text-gray-200"
                     : "text-gray-400 hover:text-gray-200"
@@ -165,7 +165,7 @@ export default function PreviewHome() {
               {has4ConversationMessages && (
                 <button
                   onClick={() => setBehindTheScenesOpen(!behindTheScenesOpen)}
-                  className={`flex w-full items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                     behindTheScenesOpen
                       ? "bg-gray-800 text-gray-200"
                       : "text-gray-400 hover:text-gray-200"

@@ -176,17 +176,16 @@ export default function MedicalTranscription() {
         console.log('Tab.Group onChange called with index:', index);
         handleModeSwitch(index);
       }}>
-        <Tab.List className="flex space-x-1 rounded-xl bg-gray-900 p-1 w-full border border-gray-800">
+        <Tab.List className="flex w-full gap-2 rounded-full border border-white/10 bg-white/5 p-1">
           {Object.keys(categories).map((category) => (
             <Tab
               key={category}
               className={({ selected }) =>
                 classNames(
-                  'w-full rounded-lg py-3 text-sm font-medium leading-5 transition-all duration-150',
-                  'ring-white/60 ring-offset-2 ring-offset-blue-400 focus:outline-none',
+                  'w-full rounded-full py-2 text-sm font-medium leading-5 transition-all duration-150 focus:outline-none',
                   selected
-                    ? 'bg-gray-800 text-gray-100 shadow-lg shadow-black/30'
-                    : 'text-gray-400 hover:bg-gray-800/30 hover:text-gray-100'
+                    ? 'bg-white/10 text-gray-100'
+                    : 'text-gray-400 hover:bg-white/5 hover:text-gray-100'
                 )
               }
             >
@@ -199,8 +198,7 @@ export default function MedicalTranscription() {
             <Tab.Panel
               key={idx}
               className={classNames(
-                'rounded-xl bg-gray-900/50 p-4 text-gray-200 border border-gray-800',
-                'ring-white/60 ring-offset-2 ring-offset-blue-400 focus:outline-none'
+                'rounded-2xl border border-white/10 bg-white/5 p-5 text-gray-200 focus:outline-none'
               )}
             >
               <Component />
@@ -209,7 +207,7 @@ export default function MedicalTranscription() {
         </Tab.Panels>
       </Tab.Group>
 
-      <div className="mt-4 rounded-xl border border-gray-800 bg-gray-900/50 p-4">
+      <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
         <h3 className="text-sm font-medium text-gray-300">Voice Commands</h3>
         <div className="mt-2 space-y-4">
           <div>
