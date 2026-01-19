@@ -71,7 +71,7 @@ export default function Home() {
   return (
     <main className="min-h-screen">
       <div className="mx-auto w-full max-w-screen-xl px-4 py-8 lg:px-8">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <header className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 px-6 py-5 backdrop-blur lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
             <Image
               src="/medscribd-logo.png"
@@ -105,7 +105,18 @@ export default function Home() {
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <section className="space-y-6">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <div className="text-xs uppercase tracking-[0.3em] text-brand-mist/70">
+                    Live Capture
+                  </div>
+                  <h2 className="text-lg font-semibold text-brand-cloud">Ambient scribe</h2>
+                </div>
+                <span className="rounded-full border border-brand-teal/30 bg-brand-teal/20 px-3 py-1 text-xs text-brand-mist">
+                  Listening
+                </span>
+              </div>
               <Suspense fallback={<div>Loading...</div>}>
                 <App
                   defaultStsConfig={stsConfig}
@@ -115,7 +126,13 @@ export default function Home() {
               </Suspense>
             </div>
             <UploadNotes />
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+              <div className="mb-4">
+                <div className="text-xs uppercase tracking-[0.3em] text-brand-mist/70">
+                  Structured Notes
+                </div>
+                <h2 className="text-lg font-semibold text-brand-cloud">Clinical panels</h2>
+              </div>
               <Suspense fallback={<div>Loading...</div>}>
                 <MedicalTranscription />
               </Suspense>
@@ -123,7 +140,7 @@ export default function Home() {
           </section>
 
           <aside className="space-y-4 lg:sticky lg:top-8 h-fit">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur space-y-4">
               <Intelligence />
               {!isMobile && (
                 <Suspense fallback={<div>Loading...</div>}>
@@ -131,7 +148,7 @@ export default function Home() {
                 </Suspense>
               )}
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-2">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur space-y-2">
               <button
                 onClick={toggleConversation}
                 className={`flex w-full items-center justify-between gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${

@@ -168,78 +168,89 @@ export default function UploadNotes() {
   };
 
   return (
-    <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-left">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="text-sm font-semibold text-brand-cloud">Upload notes or audio</div>
-            <div className="text-xs text-brand-mist/70">
-              Upload text or audio files to generate a SOAP note and coding suggestions.
-            </div>
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-left backdrop-blur">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <div className="text-xs uppercase tracking-[0.3em] text-brand-mist/70">
+            Upload & Generate
           </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <select
-            value={selectedTemplate}
-            onChange={(event) => setSelectedTemplate(event.target.value)}
-            className="rounded-full border border-white/10 bg-white/10 px-3 py-2 text-xs text-brand-cloud"
-          >
-            {templates.map((template) => (
-              <option key={template.id} value={template.id} className="text-brand-ink">
-                {template.label}
-              </option>
-            ))}
-          </select>
-          <input
-            type="text"
-            value={noteType}
-            onChange={(event) => setNoteType(event.target.value)}
-            placeholder="Note type (e.g., SOAP Note)"
-            className="rounded-full border border-white/10 bg-white/10 px-3 py-2 text-xs text-brand-cloud placeholder:text-brand-mist/50"
-          />
-          <label className="inline-flex cursor-pointer items-center rounded-full bg-brand-amber px-4 py-2 text-xs font-semibold text-brand-ink hover:bg-[#f2a94a] transition-colors">
-            <input
-              type="file"
-              multiple
-              accept=".txt,.md,audio/*"
-              className="hidden"
-              onChange={onUpload}
-              disabled={isUploading}
-            />
-            {isUploading ? "Uploading..." : "Upload files"}
-          </label>
+          <h2 className="text-lg font-semibold text-brand-cloud">Files & context</h2>
+          <p className="mt-1 text-xs text-brand-mist/70">
+            Upload audio or notes, add patient context, and generate structured outputs.
+          </p>
         </div>
+        <label className="inline-flex cursor-pointer items-center rounded-full bg-brand-amber px-4 py-2 text-xs font-semibold text-brand-ink hover:bg-[#f2a94a] transition-colors">
+          <input
+            type="file"
+            multiple
+            accept=".txt,.md,audio/*"
+            className="hidden"
+            onChange={onUpload}
+            disabled={isUploading}
+          />
+          {isUploading ? "Uploading..." : "Upload files"}
+        </label>
       </div>
+
+      <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_1fr]">
+        <select
+          value={selectedTemplate}
+          onChange={(event) => setSelectedTemplate(event.target.value)}
+          className="rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-xs text-brand-cloud"
+        >
+          {templates.map((template) => (
+            <option key={template.id} value={template.id} className="text-brand-ink">
+              {template.label}
+            </option>
+          ))}
+        </select>
+        <input
+          type="text"
+          value={noteType}
+          onChange={(event) => setNoteType(event.target.value)}
+          placeholder="Note type (e.g., SOAP Note)"
+          className="rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-xs text-brand-cloud placeholder:text-brand-mist/50"
+        />
+      </div>
+
       <div className="mt-3">
+        <label className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-mist/70">
+          Patient context
+        </label>
         <textarea
           value={patientContext}
           onChange={(event) => setPatientContext(event.target.value)}
           placeholder="Patient context or appointment info (optional)"
-          rows={3}
-          className="w-full rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-brand-cloud placeholder:text-brand-mist/50"
+          rows={4}
+          className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-brand-cloud placeholder:text-brand-mist/50"
         />
       </div>
       {message && <div className="mt-3 text-xs text-brand-mist/80">{message}</div>}
       {uploaded.length > 0 && (
-        <div className="mt-4 space-y-4 text-xs text-brand-mist/70">
+        <div className="mt-5 space-y-4 text-xs text-brand-mist/70">
           {uploaded.map((file) => {
             const result = results[file.storedAs];
             const isProcessing = processing[file.storedAs];
             return (
-              <div key={file.storedAs} className="rounded-xl border border-white/10 bg-white/5 p-3">
+              <div
+                key={file.storedAs}
+                className="rounded-xl border border-white/10 bg-white/5 p-4"
+              >
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <div className="text-brand-cloud">{file.name}</div>
-                    <div>{formatBytes(file.size)}</div>
+                    <div className="text-brand-mist/60">{formatBytes(file.size)}</div>
                   </div>
                   <button
                     onClick={() => onProcess(file)}
-                    className="inline-flex items-center justify-center rounded-full border border-brand-mist/30 px-3 py-1 text-xs font-semibold text-brand-cloud hover:border-brand-mist/70 transition-colors"
+                    className="inline-flex items-center justify-center rounded-full border border-brand-mist/30 px-4 py-2 text-xs font-semibold text-brand-cloud hover:border-brand-mist/70 transition-colors"
                     disabled={isProcessing}
                   >
                     {isProcessing ? "Processing..." : "Generate note"}
                   </button>
                 </div>
                 {result && (
-                  <div className="mt-3 space-y-3 text-[11px] text-brand-mist/70">
+                  <div className="mt-4 space-y-3 text-[11px] text-brand-mist/70">
                     {result.error && (
                       <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-red-200">
                         {result.error}
