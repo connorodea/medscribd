@@ -185,7 +185,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const templateKey = templateId && templateId in templates ? templateId : "primary_care";
+  const templateKey = (templateId && templateId in templates
+    ? templateId
+    : "primary_care") as keyof typeof templates;
   const generated = await runNoteGeneration(transcript, templateKey);
 
   return NextResponse.json({
