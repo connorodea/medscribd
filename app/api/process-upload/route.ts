@@ -186,8 +186,25 @@ const transcribeAudio = async (audioBuffer: Buffer) => {
   return data?.results?.channels?.[0]?.alternatives?.[0]?.transcript || "";
 };
 
-const parseJsonResponse = (content: string) => {
-  const parsed = JSON.parse(content) as {
+const tryParseJson = (input: string) => {
+  try {
+    return JSON.parse(input) as Record<string, unknown>;
+  } catch (error) {
+    const start = input.indexOf("{");
+    const end = input.lastIndexOf("}");
+    if (start !== -1 && end !== -1 && end > start) {
+      return JSON.parse(input.slice(start, end + 1)) as Record<string, unknown>;
+    }
+    throw error;
+  }
+};
+
+const parseJsonResponse = (content: string | Record<string, unknown>) => {
+  const parsed =
+    typeof content === "string"
+      ? (tryParseJson(content) as Record<string, unknown>)
+      : content;
+  const typed = parsed as {
     clinical_note?: string;
     verification_needed?: string[];
     soap?: SoapNote;
@@ -195,11 +212,11 @@ const parseJsonResponse = (content: string) => {
     cpt: CodeSuggestion[];
   };
   return {
-    clinical_note: parsed.clinical_note || "",
-    verification_needed: parsed.verification_needed || [],
-    soap: parsed.soap,
-    icd10: parsed.icd10 || [],
-    cpt: parsed.cpt || [],
+    clinical_note: typed.clinical_note || "",
+    verification_needed: typed.verification_needed || [],
+    soap: typed.soap,
+    icd10: typed.icd10 || [],
+    cpt: typed.cpt || [],
     warning: null,
   };
 };
@@ -259,6 +276,19 @@ const runOpenAi = async (transcript: string, patientContext: string, noteType: s
   }
 };
 
+const extractAnthropicContent = (data: {
+  content?: Array<{ type: string; text?: string; json?: Record<string, unknown> }>;
+}) => {
+  const contentItems = data?.content || [];
+  const jsonItem = contentItems.find((item) => item.type === "json" && item.json);
+  if (jsonItem?.json) return jsonItem.json;
+  const textItem = contentItems.find((item) => item.type === "text" && item.text);
+  return textItem?.text || "";
+};
+
+const sanitizePreview = (value: string, max = 800) =>
+  value.length > max ? `${value.slice(0, max)}…` : value;
+
 const runAnthropic = async (transcript: string, patientContext: string, noteType: string) => {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   const model = process.env.ANTHROPIC_MODEL;
@@ -298,11 +328,19 @@ const runAnthropic = async (transcript: string, patientContext: string, noteType
 
   if (!response.ok) {
     const errorBody = await response.text();
+    const requestId = response.headers.get("x-request-id") || "unknown";
+    console.error("Anthropic request failed:", response.status, requestId, errorBody);
     throw new Error(`Anthropic request failed: ${errorBody}`);
   }
 
   const data = await response.json();
-  const content = data?.content?.find((item: { type: string }) => item.type === "text")?.text;
+  const content = extractAnthropicContent(data);
+  if (data?.content) {
+    console.info(
+      "Anthropic content types:",
+      data.content.map((item: { type: string }) => item.type),
+    );
+  }
   if (!content) {
     throw new Error("Anthropic response was empty.");
   }
@@ -310,6 +348,9 @@ const runAnthropic = async (transcript: string, patientContext: string, noteType
   try {
     return parseJsonResponse(content);
   } catch (error) {
+    if (typeof content === "string") {
+      console.error("Anthropic invalid JSON response preview:", sanitizePreview(content));
+    }
     throw new Error("Anthropic response was not valid JSON.");
   }
 };
@@ -327,58 +368,65 @@ const runNoteGeneration = async (
 };
 
 export async function POST(request: NextRequest) {
-  const { storedAs, templateId, provider, patientContext, noteType } = (await request.json()) as {
-    storedAs?: string;
-    templateId?: string;
-    provider?: string;
-    patientContext?: string;
-    noteType?: string;
-  };
+  try {
+    const { storedAs, templateId, provider, patientContext, noteType } =
+      (await request.json()) as {
+        storedAs?: string;
+        templateId?: string;
+        provider?: string;
+        patientContext?: string;
+        noteType?: string;
+      };
 
-  if (!storedAs) {
-    return NextResponse.json({ error: "Missing storedAs value." }, { status: 400 });
-  }
+    if (!storedAs) {
+      return NextResponse.json({ error: "Missing storedAs value." }, { status: 400 });
+    }
 
-  const uploadDir = getUploadDir();
-  const filePath = path.join(uploadDir, storedAs);
-  const ext = path.extname(storedAs).toLowerCase();
+    const uploadDir = getUploadDir();
+    const filePath = path.join(uploadDir, storedAs);
+    const ext = path.extname(storedAs).toLowerCase();
 
-  const fileBuffer = await readFile(filePath);
-  let transcript = "";
+    const fileBuffer = await readFile(filePath);
+    let transcript = "";
 
-  if ([".txt", ".md"].includes(ext)) {
-    transcript = fileBuffer.toString("utf-8");
-  } else if (
-    [".wav", ".mp3", ".m4a", ".ogg", ".webm", ".flac", ".aac"].includes(ext)
-  ) {
-    transcript = await transcribeAudio(fileBuffer);
-  } else {
-    return NextResponse.json(
-      { error: "Unsupported file type. Upload audio or text files." },
-      { status: 400 },
+    if ([".txt", ".md"].includes(ext)) {
+      transcript = fileBuffer.toString("utf-8");
+    } else if (
+      [".wav", ".mp3", ".m4a", ".ogg", ".webm", ".flac", ".aac"].includes(ext)
+    ) {
+      transcript = await transcribeAudio(fileBuffer);
+    } else {
+      return NextResponse.json(
+        { error: "Unsupported file type. Upload audio or text files." },
+        { status: 400 },
+      );
+    }
+
+    const templateKey = (templateId && templateId in templates
+      ? templateId
+      : "primary_care") as keyof typeof templates;
+    const selectedProvider = provider || process.env.LLM_PROVIDER || "anthropic";
+    const resolvedNoteType = noteType || templates[templateKey]?.name || "SOAP Note";
+    const generated = await runNoteGeneration(
+      transcript,
+      selectedProvider,
+      patientContext || "",
+      resolvedNoteType,
     );
+
+    return NextResponse.json({
+      transcript,
+      soap: generated.soap,
+      clinical_note: generated.clinical_note,
+      verification_needed: generated.verification_needed,
+      icd10: generated.icd10,
+      cpt: generated.cpt,
+      provider: selectedProvider,
+      warning: generated.warning,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Processing failed.";
+    console.error("process-upload failure:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-
-  const templateKey = (templateId && templateId in templates
-    ? templateId
-    : "primary_care") as keyof typeof templates;
-  const selectedProvider = provider || process.env.LLM_PROVIDER || "anthropic";
-  const resolvedNoteType = noteType || templates[templateKey]?.name || "SOAP Note";
-  const generated = await runNoteGeneration(
-    transcript,
-    selectedProvider,
-    patientContext || "",
-    resolvedNoteType,
-  );
-
-  return NextResponse.json({
-    transcript,
-    soap: generated.soap,
-    clinical_note: generated.clinical_note,
-    verification_needed: generated.verification_needed,
-    icd10: generated.icd10,
-    cpt: generated.cpt,
-    provider: selectedProvider,
-    warning: generated.warning,
-  });
 }
