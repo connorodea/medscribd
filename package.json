@@ -30,6 +30,7 @@
     "@flydotio/dockerfile": "^0.7.10",
     "@types/node": "20.14.10",
     "@types/nunjucks": "^3.2.6",
+    "@types/pdfkit": "^0.17.4",
     "@types/react": "18.3.4",
     "@typescript-eslint/eslint-plugin": "^7.16.0",
     "autoprefixer": "^10.4.20",
