@@ -169,7 +169,7 @@ export type DGMessage =
 
 export const withBasePath = (path: string): string => {
   const basePath = nextConfig.basePath || "/";
-  if (path === "/") return basePath;
+  if (basePath === "/" || path === "/") return basePath === "/" ? path : basePath;
 
   return basePath + path;
 };

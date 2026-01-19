@@ -83,13 +83,13 @@ Before you begin, ensure you have the following:
 
 6. **Open your browser**
    
-   Navigate to `http://localhost:3000` to start using medscribd!
+   Navigate to `http://localhost:3000` for the landing page and `http://localhost:3000/agent` to use the live demo.
 
 ## 🎮 Usage
 
 ### 🎤 **Getting Started with Voice Commands**
 
-1. Medscribd will greet you after opening the webpage, you can switch between Standard and Bedrock mode to test different LLM providers.
+1. Open `/agent` to start the live demo. Medscribd will greet you, and you can switch between Standard and Bedrock mode to test different LLM providers.
 2. **Choose your mode**:
    - Say *"Clinical Note"* for medical documentation
    - Say *"Drug Dispatch"* for prescription management  

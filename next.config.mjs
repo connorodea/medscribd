@@ -1,10 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  basePath: "/agent",
-  redirects: () => [
-    { source: "/", destination: "/agent", permanent: false, basePath: false },
-  ],
-
   images: {
     remotePatterns: [
       {

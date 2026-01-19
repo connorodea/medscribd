@@ -22,6 +22,7 @@ body {
     radial-gradient(circle at 10% 20%, rgba(15, 93, 93, 0.35), transparent 55%),
     linear-gradient(135deg, #0b1220 0%, #0f172a 45%, #0f3b3b 100%);
   color: var(--color-cloud);
+  scroll-behavior: smooth;
 }
 
 h2 {

@@ -2,7 +2,7 @@
 import { useState, Suspense } from "react";
 import { App } from "../components/App";
 import Intelligence from "../components/Intelligence";
-import { stsBedrockConfig as stsConfig } from "../lib/constants";
+import { stsConfig } from "../lib/constants";
 import {
   isConversationMessage,
   useVoiceBot,
@@ -16,9 +16,9 @@ import ShareButtonsPanel from "../components/ShareButtonsPanel";
 import * as WaitlistLink from "../components/WaitlistLink";
 import { useStsQueryParams } from "../hooks/UseStsQueryParams";
 import BehindTheScenes from "../components/BehindTheScenes";
-import { VoiceBotProvider } from '../context/VoiceBotContextProvider';
-import { DeepgramContextProvider } from '../context/DeepgramContextProvider';
-import MedicalTranscription from '../components/medical/MedicalTranscription';
+import { VoiceBotProvider } from "../context/VoiceBotContextProvider";
+import { DeepgramContextProvider } from "../context/DeepgramContextProvider";
+import MedicalTranscription from "../components/medical/MedicalTranscription";
 import Conversation from "../components/Conversation";
 import VoiceSelector from "../components/VoiceSelector/VoiceSelector";
 import { isMobile } from "react-device-detect";
@@ -50,15 +50,15 @@ const DesktopMenuItems = () => {
 const ProviderToggleButton = () => {
   return (
     <a
-      href="/agent"
+      href="/agent/bedrock"
       className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors text-gray-400 hover:text-gray-200 hover:bg-gray-800"
     >
-      <span>Standard</span>
+      <span>Bedrock</span>
     </a>
   );
 };
 
-export default function PreviewHome() {
+export default function Home() {
   const { messages } = useVoiceBot();
   const [conversationOpen, setConversationOpen] = useState(false);
   const [behindTheScenesOpen, setBehindTheScenesOpen] = useState(false);
@@ -98,7 +98,7 @@ export default function PreviewHome() {
             </p>
             <div className="mt-3">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-teal/20 text-brand-mist border border-brand-teal/50">
-                Bedrock
+                Standard
               </span>
             </div>
           </div>

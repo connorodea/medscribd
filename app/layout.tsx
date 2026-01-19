@@ -1,11 +1,5 @@
 import type { ReactNode } from "react";
 import { Sora, Source_Sans_3, Fira_Code } from "next/font/google";
-import { DeepgramContextProvider } from "./context/DeepgramContextProvider";
-import { MicrophoneContextProvider } from "./context/MicrophoneContextProvider";
-import { VoiceBotProvider } from "./context/VoiceBotContextProvider";
-import AnimatedBackground from "./components/AnimatedBackground";
-import VendorScripts from "./components/VendorScripts";
-
 import "./globals.css";
 import { sharedOpenGraphMetadata } from "./lib/constants";
 
@@ -26,7 +20,7 @@ const fira = Fira_Code({
 });
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_PATH || ""),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://medscribd.com"),
   title: "medscribd | AI medical scribe",
   description: "Clinical notes, captured in real time.",
   openGraph: sharedOpenGraphMetadata,
@@ -42,16 +36,7 @@ const fonts = [sora, sourceSans, fira].map((font) => font.variable).join(" ");
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${fonts} font-source`}>
-      <body>
-        <AnimatedBackground>
-          <VoiceBotProvider>
-            <MicrophoneContextProvider>
-              <DeepgramContextProvider>{children}</DeepgramContextProvider>
-            </MicrophoneContextProvider>
-          </VoiceBotProvider>
-        </AnimatedBackground>
-        <VendorScripts />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
