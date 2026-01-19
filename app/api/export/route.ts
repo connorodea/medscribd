@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     return new NextResponse(markdown, {
       headers: {
         "Content-Type": "text/markdown",
-        "Content-Disposition": `attachment; filename=\"medscribd-note.md\"`,
+        "Content-Disposition": 'attachment; filename="medscribd-note.md"',
       },
     });
   }
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     return new NextResponse(pdfBuffer, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename=\"medscribd-note.pdf\"`,
+        "Content-Disposition": 'attachment; filename="medscribd-note.pdf"',
       },
     });
   }
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     headers: {
       "Content-Type":
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "Content-Disposition": `attachment; filename=\"medscribd-note.docx\"`,
+      "Content-Disposition": 'attachment; filename="medscribd-note.docx"',
     },
   });
 }
