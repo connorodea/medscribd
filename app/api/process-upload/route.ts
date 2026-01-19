@@ -210,12 +210,7 @@ const parseJsonResponse = (content: string) => {
   };
 };
 
-const runOpenAi = async (
-  transcript: string,
-  templateId: keyof typeof templates,
-  patientContext: string,
-  noteType: string,
-) => {
+const runOpenAi = async (transcript: string, patientContext: string, noteType: string) => {
   const apiKey = process.env.OPENAI_API_KEY;
   const model = process.env.OPENAI_MODEL;
   if (!apiKey || !model) {
@@ -270,12 +265,7 @@ const runOpenAi = async (
   }
 };
 
-const runAnthropic = async (
-  transcript: string,
-  templateId: keyof typeof templates,
-  patientContext: string,
-  noteType: string,
-) => {
+const runAnthropic = async (transcript: string, patientContext: string, noteType: string) => {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   const model = process.env.ANTHROPIC_MODEL;
   if (!apiKey || !model) {
@@ -331,15 +321,14 @@ const runAnthropic = async (
 
 const runNoteGeneration = async (
   transcript: string,
-  templateId: keyof typeof templates,
   provider: string,
   patientContext: string,
   noteType: string,
 ) => {
   if (provider === "anthropic") {
-    return runAnthropic(transcript, templateId, patientContext, noteType);
+    return runAnthropic(transcript, patientContext, noteType);
   }
-  return runOpenAi(transcript, templateId, patientContext, noteType);
+  return runOpenAi(transcript, patientContext, noteType);
 };
 
 export async function POST(request: NextRequest) {
@@ -382,7 +371,6 @@ export async function POST(request: NextRequest) {
   const resolvedNoteType = noteType || templates[templateKey]?.name || "SOAP Note";
   const generated = await runNoteGeneration(
     transcript,
-    templateKey,
     selectedProvider,
     patientContext || "",
     resolvedNoteType,
