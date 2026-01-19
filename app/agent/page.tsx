@@ -5,7 +5,6 @@ import { App } from "../components/App";
 import { stsConfig } from "../lib/constants";
 import { useVoiceBot } from "../context/VoiceBotContextProvider";
 import { CaretIcon } from "../components/icons/CaretIcon";
-import Conversation from "../components/Conversation";
 import MedicalTranscription from "../components/medical/MedicalTranscription";
 import Conversation from "../components/Conversation";
 import VoiceSelector from "../components/VoiceSelector/VoiceSelector";
