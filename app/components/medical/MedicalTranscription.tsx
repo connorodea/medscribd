@@ -171,7 +171,7 @@ export default function MedicalTranscription() {
   }, [selectedIndex]);
 
   return (
-    <div className="mt-14 w-full px-2 sm:px-0">
+    <div className="w-full px-2 sm:px-0">
       <Tab.Group selectedIndex={selectedIndex} onChange={(index) => {
         console.log('Tab.Group onChange called with index:', index);
         handleModeSwitch(index);
@@ -209,19 +209,16 @@ export default function MedicalTranscription() {
         </Tab.Panels>
       </Tab.Group>
 
-      {/* Voice Command Instructions - Floating Sidebar */}
-      <div className="absolute -right-[420px] top-[288px] w-[400px]">
-        <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-800">
-          <h3 className="text-sm font-medium text-gray-300 mb-2">Voice Commands:</h3>
-          <div className="space-y-4">
-            {/* Mode Switching Commands */}
-            <div>
-              <ul className="text-sm text-gray-400">
-                <li>• &quot;Start Clinical Note&quot; - Switch to Clinical Notes</li>
-                <li>• &quot;Start Drug Dispatch&quot; - Switch to Drug Dispatch</li>
-                <li>• &quot;Start Scheduling&quot; - Switch to Scheduling</li>
-              </ul>
-            </div>
+      <div className="mt-4 rounded-xl border border-gray-800 bg-gray-900/50 p-4">
+        <h3 className="text-sm font-medium text-gray-300">Voice Commands</h3>
+        <div className="mt-2 space-y-4">
+          <div>
+            <ul className="text-sm text-gray-400">
+              <li>• &quot;Start Clinical Note&quot; - Switch to Clinical Notes</li>
+              <li>• &quot;Start Drug Dispatch&quot; - Switch to Drug Dispatch</li>
+              <li>• &quot;Start Scheduling&quot; - Switch to Scheduling</li>
+            </ul>
+          </div>
 
             {/* Clinical Note Commands - Only show when Clinical Notes tab is active */}
             {selectedIndex === 0 && (
@@ -288,9 +285,8 @@ export default function MedicalTranscription() {
                 </ul>
               </div>
             )}
-          </div>
         </div>
       </div>
     </div>
   );
-} 
+}

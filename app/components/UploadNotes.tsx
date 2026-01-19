@@ -30,6 +30,7 @@ type ProcessResult = {
   icd10: CodeSuggestion[];
   cpt: CodeSuggestion[];
   warning?: string | null;
+  error?: string | null;
 };
 
 const templates = [
@@ -141,13 +142,26 @@ export default function UploadNotes() {
         throw new Error(body.error || "Processing failed.");
       }
       const data = (await response.json()) as ProcessResult;
-      setResults((prev) => ({ ...prev, [file.storedAs]: data }));
+      setResults((prev) => ({ ...prev, [file.storedAs]: { ...data, error: null } }));
       if (data.warning) {
         setMessage(data.warning);
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Processing failed.";
       setMessage(message);
+      setResults((prev) => ({
+        ...prev,
+        [file.storedAs]: {
+          transcript: "",
+          soap: null,
+          clinical_note: "",
+          verification_needed: [],
+          icd10: [],
+          cpt: [],
+          warning: null,
+          error: message,
+        },
+      }));
     } finally {
       setProcessing((prev) => ({ ...prev, [file.storedAs]: false }));
     }
@@ -226,6 +240,11 @@ export default function UploadNotes() {
                 </div>
                 {result && (
                   <div className="mt-3 space-y-3 text-[11px] text-brand-mist/70">
+                    {result.error && (
+                      <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-red-200">
+                        {result.error}
+                      </div>
+                    )}
                     <div className="rounded-lg border border-white/10 bg-[#0b1220] p-3">
                       <div className="text-brand-cloud font-semibold">Clinical Note</div>
                       {result.clinical_note ? (
