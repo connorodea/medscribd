@@ -158,7 +158,7 @@ const runNoteGeneration = async (transcript: string, templateId: keyof typeof te
 export async function POST(request: NextRequest) {
   const { storedAs, templateId } = (await request.json()) as {
     storedAs?: string;
-    templateId?: keyof typeof templates;
+    templateId?: string;
   };
 
   if (!storedAs) {

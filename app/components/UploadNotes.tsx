@@ -48,7 +48,7 @@ export default function UploadNotes() {
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [uploaded, setUploaded] = useState<UploadedFile[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState(templates[0].id);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>(templates[0].id);
   const [processing, setProcessing] = useState<Record<string, boolean>>({});
   const [results, setResults] = useState<Record<string, ProcessResult>>({});
 
