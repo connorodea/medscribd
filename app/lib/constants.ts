@@ -32,7 +32,7 @@ const baseConfig = {
     think: {
       provider: { type: "open_ai", model: "gpt-4o-mini" },
     },
-    greeting: "Hi, I am Aura, your medical assistant! Which task would you like to start with?"
+    greeting: "Hi, I am Medscribd, your AI medical scribe. Which task would you like to start with?"
   },
 };
 
@@ -51,7 +51,7 @@ const himmsConfig = {
         {
           type: "History",
           role: "assistant",
-          content: "Hi I am Aura, your Medical Assistant! Which task would you like to start with?"
+          content: "Hi I am Medscribd, your AI medical scribe. Which task would you like to start with?"
         },
       ],
     },
@@ -584,10 +584,10 @@ export const availableVoices: NonEmptyArray<Voice> = [
 export const defaultVoice: Voice = availableVoices[0];
 
 export const sharedOpenGraphMetadata = {
-  title: "Voice Agent | Deepgram",
+  title: "medscribd | AI medical scribe",
   type: "website",
   url: "/",
-  description: "Meet Deepgram's Voice Agent API",
+  description: "Clinical notes, captured in real time.",
 };
 
 export const latencyMeasurementQueryParam = "latency-measurement";

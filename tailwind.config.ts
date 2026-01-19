@@ -12,9 +12,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        favorit: ["var(--font-favorit)", "Arial", "sans serif"],
-        inter: ["var(--font-inter)", "Arial", "sans serif"],
-        fira: ["var(--font-fira)", "monospace"],
+        sora: ["var(--font-sora)", "ui-sans-serif", "sans-serif"],
+        source: ["var(--font-source)", "ui-sans-serif", "sans-serif"],
+        fira: ["var(--font-fira)", "ui-monospace", "monospace"],
       },
       colors: {
         gray: {
@@ -34,6 +34,13 @@ export default {
         },
         green: {
           spring: "#13EF93",
+        },
+        brand: {
+          teal: "#0F5D5D",
+          mist: "#E8F3F1",
+          amber: "#F4B860",
+          ink: "#0F172A",
+          cloud: "#F8FAFC",
         },
       },
     },

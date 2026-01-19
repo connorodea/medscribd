@@ -53,7 +53,7 @@ const ProviderToggleButton = () => {
       href="/agent"
       className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors text-gray-400 hover:text-gray-200 hover:bg-gray-800"
     >
-      <span>Default</span>
+      <span>Standard</span>
     </a>
   );
 };
@@ -82,22 +82,24 @@ export default function PreviewHome() {
 
         {/* Center panel */}
         <div className="mx-auto max-w-3xl relative">
-          <div className="">
-            {/* Deepgram Logo */}
-            <div className="flex justify-center mb-4">
-              <img 
-                src="/agent/Deepgram-wordmark-white.png" 
-                alt="Deepgram" 
-                className="h-16 w-auto filter"
-              />
-            </div>
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-200">Medical Assistant Voice Agent</h1>
-              <div className="mt-2">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-200 border border-blue-700">
-                  Bedrock
-                </span>
+          <div className="text-center">
+            <div className="flex justify-center mb-3">
+              <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5">
+                <span className="text-xs uppercase tracking-[0.3em] text-brand-mist/80">medscribd</span>
+                <span className="h-1 w-1 rounded-full bg-brand-amber" />
+                <span className="text-xs text-brand-mist/70">AI medical scribe</span>
               </div>
+            </div>
+            <h1 className="text-3xl font-semibold text-brand-cloud font-sora">
+              Clinical notes, captured in real time.
+            </h1>
+            <p className="mt-2 text-sm text-brand-mist/70">
+              Speak naturally. medscribd organizes the encounter as you talk.
+            </p>
+            <div className="mt-3">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-teal/20 text-brand-mist border border-brand-teal/50">
+                Bedrock
+              </span>
             </div>
           </div>
           <DeepgramContextProvider>
@@ -166,4 +168,3 @@ export default function PreviewHome() {
     </main>
   );
 }
-

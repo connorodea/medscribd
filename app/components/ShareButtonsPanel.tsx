@@ -74,7 +74,7 @@ const ShareButtonsPanel = ({ label }: Props) => {
     <div className="space-y-6">
       <div className="flex items-center space-x-2 text-sm text-gray-25">
         <BullhornIcon />
-        <span className="uppercase font-favorit">Share</span>
+        <span className="uppercase font-sora">Share</span>
       </div>
       {attachParamsToCopyUrlMessage && (
         <label className="flex items-start cursor-pointer">
@@ -96,7 +96,7 @@ const ShareButtonsPanel = ({ label }: Props) => {
       )}
       <div className="flex items-center gap-x-4">
         {label && <span className="text-gray-450">{label}</span>}
-        <div className="h-full flex items-center gap-8 md:gap-4 font-inter text-gray-350 text-2xl">
+        <div className="h-full flex items-center gap-8 md:gap-4 font-source text-gray-350 text-2xl">
           <div className="relative">
             <button className="link flex items-center" onClick={onCopyLinkClick}>
               <ShareIcon className="md:hover:text-blue-link" />

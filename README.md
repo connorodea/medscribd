@@ -1,8 +1,8 @@
-# 🏥 Medical Assistant Voice Agent
+# 🩺 medscribd
 
 ## ✨ Overview
 
-This **Medical Assistant Voice Agent** is a demo application that showcases the power of conversational AI in healthcare settings. Built with the [Deepgram Voice Agent API](https://developers.deepgram.com/docs/voice-agent) and AWS Bedrock, it provides a seamless voice interface for medical professionals to:
+**medscribd** is a demo application that showcases a branded AI medical scribe experience. Built with the [Deepgram Voice Agent API](https://developers.deepgram.com/docs/voice-agent) and AWS Bedrock, it provides a seamless voice interface for medical professionals to:
 
 - 📝 **Create Clinical Notes** - Dictate patient encounters and medical observations
 - 💊 **Manage Drug Dispatching** - Handle medication prescriptions and pharmacy communications  
@@ -43,7 +43,7 @@ Before you begin, ensure you have the following:
 1. **Clone the repository**
    ```bash
    git clone https://github.com/deepgram-devs/Medical-Assistant-Voice-Agent.git
-   cd medical-assistant-voice-agent
+   cd Medical-Assistant-Voice-Agent
    ```
 
 2. **Install dependencies**
@@ -58,6 +58,10 @@ Before you begin, ensure you have the following:
    Set up your Deepgram API key:
    ```bash
    export DEEPGRAM_API_KEY=your_deepgram_api_key_here
+   ```
+   Or copy the example file:
+   ```bash
+   cp .env.local.example .env.local
    ```
 
 4. **Configure AWS Bedrock (Optional)**
@@ -79,13 +83,13 @@ Before you begin, ensure you have the following:
 
 6. **Open your browser**
    
-   Navigate to `http://localhost:3000` to start using the Medical Assistant!
+   Navigate to `http://localhost:3000` to start using medscribd!
 
 ## 🎮 Usage
 
 ### 🎤 **Getting Started with Voice Commands**
 
-1. The Voice Agent will greet you after opening the webpage, you can switch between Default and Bedrock mode to test different LLM providers.
+1. Medscribd will greet you after opening the webpage, you can switch between Standard and Bedrock mode to test different LLM providers.
 2. **Choose your mode**:
    - Say *"Clinical Note"* for medical documentation
    - Say *"Drug Dispatch"* for prescription management  
@@ -124,7 +128,7 @@ This project is open source and available under the [MIT License](LICENSE).
 
 <div align="center">
 
-**Built with ❤️ using Deepgram Voice Agent API**
+**Built with Deepgram Voice Agent API**
 
 [⬆️ Back to Top](#-medical-assistant-voice-agent)
 

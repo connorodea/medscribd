@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
-import { Inter, Fira_Code } from "next/font/google";
-import localFont from "next/font/local";
+import { Sora, Source_Sans_3, Fira_Code } from "next/font/google";
 import { DeepgramContextProvider } from "./context/DeepgramContextProvider";
 import { MicrophoneContextProvider } from "./context/MicrophoneContextProvider";
 import { VoiceBotProvider } from "./context/VoiceBotContextProvider";
@@ -10,9 +9,14 @@ import VendorScripts from "./components/VendorScripts";
 import "./globals.css";
 import { sharedOpenGraphMetadata } from "./lib/constants";
 
-const inter = Inter({
+const sora = Sora({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-sora",
+  display: "fallback",
+});
+const sourceSans = Source_Sans_3({
+  subsets: ["latin"],
+  variable: "--font-source",
   display: "fallback",
 });
 const fira = Fira_Code({
@@ -20,30 +24,24 @@ const fira = Fira_Code({
   variable: "--font-fira",
   display: "fallback",
 });
-const favorit = localFont({
-  src: "./fonts/ABCFavorit-Bold.woff2",
-  weight: "700",
-  variable: "--font-favorit",
-  display: "fallback",
-});
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_PATH || ""),
-  title: "Voice Agent | Deepgram",
-  description: "Meet Deepgram's Voice Agent API",
+  title: "medscribd | AI medical scribe",
+  description: "Clinical notes, captured in real time.",
   openGraph: sharedOpenGraphMetadata,
   twitter: {
     card: "summary_large_image",
-    site: "@DeepgramAI",
-    creator: "@DeepgramAI",
+    site: "@medscribd",
+    creator: "@medscribd",
   },
 };
 
-const fonts = [inter, fira, favorit].map((font) => font.variable).join(" ");
+const fonts = [sora, sourceSans, fira].map((font) => font.variable).join(" ");
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${fonts} font-inter`}>
+    <html lang="en" className={`${fonts} font-source`}>
       <body>
         <AnimatedBackground>
           <VoiceBotProvider>

@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-ink: #0f172a;
+  --color-teal: #0f5d5d;
+  --color-mist: #e8f3f1;
+  --color-amber: #f4b860;
+  --color-cloud: #f8fafc;
+}
+
 html,
 body {
   margin: 0;
@@ -10,7 +18,10 @@ body {
   overflow-y: auto;
   height: 100%;
   width: 100%;
-  background: black;
+  background: radial-gradient(circle at top right, rgba(244, 184, 96, 0.15), transparent 50%),
+    radial-gradient(circle at 10% 20%, rgba(15, 93, 93, 0.35), transparent 55%),
+    linear-gradient(135deg, #0b1220 0%, #0f172a 45%, #0f3b3b 100%);
+  color: var(--color-cloud);
 }
 
 h2 {

@@ -38,7 +38,7 @@ const InstructionInput: FC<Props> = ({ focusOnMount = false, ...rest }) => {
   return (
     <div {...rest}>
       <label>
-        <div className="flex items-center gap-2 text-sm uppercase font-bold font-favorit text-gray-25">
+      <div className="flex items-center gap-2 text-sm uppercase font-bold font-sora text-gray-25">
           <PencilIcon />
           Prompt
         </div>
