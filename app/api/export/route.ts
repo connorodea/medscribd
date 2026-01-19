@@ -28,8 +28,26 @@ const toBuffer = (doc: PDFKit.PDFDocument) =>
     doc.on("error", reject);
   });
 
-const buildPdf = async (markdown: string, title: string, logo?: Buffer) => {
+const loadPdfFont = async () => {
+  try {
+    const fontPath = path.join(process.cwd(), "public", "fonts", "SourceSans3-Regular.ttf");
+    return await readFile(fontPath);
+  } catch (error) {
+    return undefined;
+  }
+};
+
+const buildPdf = async (
+  markdown: string,
+  title: string,
+  logo?: Buffer,
+  fontBuffer?: Buffer,
+) => {
   const doc = new PDFDocument({ margin: 48 });
+  if (fontBuffer) {
+    doc.registerFont("medscribd", fontBuffer);
+    doc.font("medscribd");
+  }
   if (logo) {
     doc.image(logo, { fit: [180, 48] });
     doc.moveDown();
@@ -109,6 +127,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     logoBuffer = undefined;
   }
+  const fontBuffer = await loadPdfFont();
 
   if (format === "md") {
     return new NextResponse(markdown, {
@@ -120,7 +139,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (format === "pdf") {
-    const pdfBuffer = await buildPdf(markdown, note_type, logoBuffer);
+    const pdfBuffer = await buildPdf(markdown, note_type, logoBuffer, fontBuffer);
     return new NextResponse(pdfBuffer, {
       headers: {
         "Content-Type": "application/pdf",
