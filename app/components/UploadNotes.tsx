@@ -56,6 +56,41 @@ export default function UploadNotes() {
   const [processing, setProcessing] = useState<Record<string, boolean>>({});
   const [results, setResults] = useState<Record<string, ProcessResult>>({});
 
+  const handleExport = async (result: ProcessResult, format: "pdf" | "docx" | "md") => {
+    if (!result.clinical_note) {
+      setMessage("Generate a clinical note before exporting.");
+      return;
+    }
+
+    const response = await fetch("/api/export", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        clinical_note: result.clinical_note,
+        verification_needed: result.verification_needed || [],
+        note_type: noteType,
+        patient_context: patientContext,
+        format,
+      }),
+    });
+
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      setMessage(body.error || "Export failed.");
+      return;
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `medscribd-note.${format}`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  };
+
   const onUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
@@ -202,6 +237,26 @@ export default function UploadNotes() {
                       ) : (
                         <div className="mt-2">Transcript ready. Configure LLM keys to generate notes.</div>
                       )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => handleExport(result, "pdf")}
+                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-brand-cloud hover:border-brand-mist/70"
+                      >
+                        Export PDF
+                      </button>
+                      <button
+                        onClick={() => handleExport(result, "docx")}
+                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-brand-cloud hover:border-brand-mist/70"
+                      >
+                        Export DOCX
+                      </button>
+                      <button
+                        onClick={() => handleExport(result, "md")}
+                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-brand-cloud hover:border-brand-mist/70"
+                      >
+                        Export Markdown
+                      </button>
                     </div>
                     {result.verification_needed && result.verification_needed.length > 0 && (
                       <div className="rounded-lg border border-white/10 bg-white/5 p-3">
