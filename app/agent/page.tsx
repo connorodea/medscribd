@@ -73,8 +73,9 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center">
       <div className="flex-1 w-full max-w-screen-xl mx-auto px-4 py-8 relative">
-        {/* Left panel */}
-        <div className="hidden fixed left-8 top-8 flex flex-col items-start space-y-4">
+        <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)_240px]">
+          {/* Left panel */}
+          <div className="hidden lg:flex flex-col items-start space-y-4 lg:sticky lg:top-8 h-fit">
           <Intelligence />
           {!isMobile && (
             <Suspense fallback={<div>Loading...</div>}>
@@ -84,7 +85,7 @@ export default function Home() {
         </div>
 
         {/* Center panel */}
-        <div className="mx-auto max-w-3xl relative">
+        <div className="mx-auto w-full max-w-3xl relative">
           <div className="text-center">
             <div className="flex flex-col items-center gap-3 mb-3">
               <Image
@@ -129,7 +130,7 @@ export default function Home() {
         </div>
 
         {/* Right panel */}
-        <div className="fixed right-8 top-8 flex flex-col items-end space-y-4">
+        <div className="flex flex-wrap items-center justify-end gap-3 lg:flex-col lg:items-end lg:gap-4 lg:sticky lg:top-8 h-fit order-first lg:order-none">
           <ThemeToggle />
           <ProviderToggleButton />
           <Suspense fallback={<div>Loading...</div>}>
@@ -164,6 +165,7 @@ export default function Home() {
               <span>Behind the scenes</span>
             </button>
           )}
+        </div>
         </div>
 
         {/* Overlays */}
