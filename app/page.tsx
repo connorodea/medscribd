@@ -1,70 +1,100 @@
 import Image from "next/image";
 import ThemeToggle from "./components/ThemeToggle";
 
-const features = [
+const stats = [
+  { label: "clinicians use Medscribd", value: "20K+" },
+  { label: "health orgs trust Medscribd", value: "1,000+" },
+  { label: "hours saved every day", value: "2+" },
+];
+
+const testimonials = [
   {
-    title: "Ambient capture",
-    description:
-      "Record the visit in real time and keep your attention on the patient, not the keyboard.",
+    quote:
+      "Medscribd makes it possible for me to focus on my patients and still finish notes on time.",
+    name: "Blake T. Thompson",
+    title: "Family Medicine",
   },
   {
-    title: "Auto SOAP notes",
-    description:
-      "Generate structured notes instantly with clear Subjective, Objective, Assessment, and Plan.",
+    quote:
+      "After my first day, I couldn’t believe how much time I saved without sacrificing quality.",
+    name: "Ali Roberts",
+    title: "Urgent Care",
   },
   {
-    title: "ICD-10 + CPT suggestions",
+    quote:
+      "It’s not just the time saved. The pressure during the day is finally gone.",
+    name: "Vera Tarman, MD",
+    title: "Addictions Medicine",
+  },
+];
+
+const featureHighlights = [
+  {
+    title: "Smart visit prep",
     description:
-      "Get draft billing codes with confidence tags, then confirm with one click.",
+      "Summaries and follow-ups from previous visits so you start ready.",
   },
   {
-    title: "Specialty templates",
+    title: "Note customization",
     description:
-      "Pick a specialty and Medscribd adapts the note flow to your clinic style.",
+      "Templates that learn your format and adapt to your specialty.",
+  },
+  {
+    title: "Magic edit",
+    description:
+      "Request sweeping changes in plain language and update the note instantly.",
+  },
+  {
+    title: "Patient instructions",
+    description:
+      "Turn complex notes into clear patient guidance in seconds.",
   },
 ];
 
 const workflow = [
   {
-    title: "Start the encounter",
-    description: "Choose a template or say “Clinical Note” to begin capturing the visit.",
+    title: "Before the visit",
+    description:
+      "Start with patient context, summaries, and follow-up reminders.",
   },
   {
-    title: "Speak naturally",
-    description: "Medscribd listens, transcribes, and organizes details as you go.",
+    title: "During the visit",
+    description:
+      "Capture every detail with ambient listening and clinical transcription.",
   },
   {
-    title: "Review + approve",
-    description: "Scan the note, validate codes, and sign off in seconds.",
+    title: "After the visit",
+    description:
+      "Generate codes, letters, and patient instructions, then push to the EHR.",
   },
 ];
 
 const specialties = [
-  "Primary Care",
+  "Family Medicine",
+  "Internal Medicine",
   "Cardiology",
   "Orthopedics",
   "Psychiatry",
-  "Physical Therapy",
   "Urgent Care",
   "Pediatrics",
-  "Women's Health",
+  "OB-GYN",
 ];
 
 const faqs = [
   {
-    question: "Does Medscribd work for different specialties?",
+    question: "Is Medscribd secure and compliant?",
     answer:
-      "Yes. Select a template and the workflow adapts to the encounter type and clinical focus.",
+      "Yes. Medscribd is built for HIPAA workflows with encryption, audit logs, and secure storage.",
   },
   {
-    question: "How are codes generated?",
+    question: "Does Medscribd work with my EHR?",
     answer:
-      "ICD-10 and CPT suggestions are derived from the transcript and SOAP note, with confidence labels for quick review.",
+      "Copy/paste into any EHR or use our push workflow for browser-based systems.",
   },
   {
-    question: "Can I control what gets saved?",
+    question: "How accurate are the notes?",
     answer:
-      "Always. Medscribd keeps the draft visible so you can edit and approve before finalizing.",
+      "Clinical terminology is preserved, filler is removed, and every note stays editable.",
   },
 ];
 
@@ -120,13 +150,13 @@ export default function LandingPage() {
         <section className="grid lg:grid-cols-[1.1fr_0.9fr] gap-12 mt-16 items-center">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs uppercase tracking-[0.3em] text-brand-mist/70">
-              Built for clinician happiness
+              Purpose-built AI medical scribe
             </div>
             <h1 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-semibold text-brand-cloud font-sora leading-tight">
-              The AI medical scribe that keeps you in the visit.
+              Let’s take documentation off your to-do list.
             </h1>
             <p className="mt-5 text-lg text-brand-mist/70 max-w-xl">
-              Medscribd captures the conversation, drafts the SOAP note, and suggests billing codes so you can finish charting faster.
+              Medscribd delivers accurate clinical notes, effortless workflow, and real support — so you can finish your day on time.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <a
@@ -143,18 +173,12 @@ export default function LandingPage() {
               </a>
             </div>
             <div className="mt-10 grid gap-6 sm:grid-cols-3 text-sm text-brand-mist/60">
-              <div>
-                <div className="text-brand-cloud text-lg font-semibold">Less after-hours</div>
-                <div>Reduce night charting</div>
-              </div>
-              <div>
-                <div className="text-brand-cloud text-lg font-semibold">Ambient + accurate</div>
-                <div>Clinical detail preserved</div>
-              </div>
-              <div>
-                <div className="text-brand-cloud text-lg font-semibold">Codes included</div>
-                <div>Draft ICD/CPT review</div>
-              </div>
+              {stats.map((stat) => (
+                <div key={stat.label}>
+                  <div className="text-brand-cloud text-lg font-semibold">{stat.value}</div>
+                  <div>{stat.label}</div>
+                </div>
+              ))}
             </div>
           </div>
           <div className="relative">
@@ -208,14 +232,14 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-[0.9fr_1.1fr] gap-10 items-start">
             <div>
               <h2 className="text-3xl font-semibold text-brand-cloud font-sora">
-                Everything you need to finish notes fast.
+                Our most-loved features.
               </h2>
               <p className="mt-4 text-brand-mist/70">
-                Medscribd combines real-time transcription, structured note generation, and coding suggestions in one flow.
+                Medscribd is built for clinicians — every feature is designed to reduce charting friction.
               </p>
             </div>
             <div className="grid sm:grid-cols-2 gap-6">
-              {features.map((item) => (
+              {featureHighlights.map((item) => (
                 <div
                   key={item.title}
                   className="rounded-2xl border border-white/10 bg-white/5 p-5"
@@ -234,10 +258,10 @@ export default function LandingPage() {
           <div className="flex flex-col lg:flex-row items-start gap-10">
             <div className="lg:w-1/3">
               <h2 className="text-3xl font-semibold text-brand-cloud font-sora">
-                A familiar workflow, automated.
+                Off-the-charts simplicity.
               </h2>
               <p className="mt-4 text-brand-mist/70">
-                Capture the visit, generate the note, and confirm billing codes without extra clicks.
+                Medscribd supports you through every step of the visit.
               </p>
             </div>
             <div className="flex-1 grid gap-5">
@@ -265,10 +289,10 @@ export default function LandingPage() {
           <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-10">
             <div>
               <h2 className="text-3xl font-semibold text-brand-cloud font-sora">
-                Built for busy specialties.
+                Built for every specialty.
               </h2>
               <p className="mt-4 text-brand-mist/70">
-                Choose the template that matches your practice and generate notes with the right clinical focus.
+                Specialty-aware templates deliver the right structure for every visit type.
               </p>
               <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-brand-mist/70">
                 <div className="text-brand-cloud font-semibold">Template highlights</div>
@@ -290,6 +314,24 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-white/5">
+        <div className="max-w-screen-xl mx-auto px-6 py-16">
+          <div className="grid md:grid-cols-3 gap-6">
+            {testimonials.map((testimonial) => (
+              <div
+                key={testimonial.name}
+                className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-brand-mist/70"
+              >
+                <div className="text-brand-cloud font-semibold">“{testimonial.quote}”</div>
+                <div className="mt-4 text-xs text-brand-mist/60">
+                  {testimonial.name} · {testimonial.title}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

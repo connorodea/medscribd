@@ -75,14 +75,16 @@ export default function Home() {
       <div className="flex-1 w-full max-w-screen-xl mx-auto px-4 py-8 relative">
         <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)_240px]">
           {/* Left panel */}
-          <div className="hidden lg:flex flex-col items-start space-y-4 lg:sticky lg:top-8 h-fit">
-          <Intelligence />
-          {!isMobile && (
-            <Suspense fallback={<div>Loading...</div>}>
-              <DesktopMenuItems />
-            </Suspense>
-          )}
-        </div>
+          <div className="hidden lg:flex flex-col items-start lg:sticky lg:top-8 h-fit">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-4">
+              <Intelligence />
+              {!isMobile && (
+                <Suspense fallback={<div>Loading...</div>}>
+                  <DesktopMenuItems />
+                </Suspense>
+              )}
+            </div>
+          </div>
 
         {/* Center panel */}
         <div className="mx-auto w-full max-w-3xl relative">
@@ -131,40 +133,42 @@ export default function Home() {
 
         {/* Right panel */}
         <div className="flex flex-wrap items-center justify-end gap-3 lg:flex-col lg:items-end lg:gap-4 lg:sticky lg:top-8 h-fit order-first lg:order-none">
-          <ThemeToggle />
-          <ProviderToggleButton />
-          <Suspense fallback={<div>Loading...</div>}>
-            <VoiceSelector />
-            {isMobile && <MobileMenu />}
-          </Suspense>
-          <button
-            onClick={toggleConversation}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              conversationOpen
-                ? "bg-gray-800 text-gray-200"
-                : "text-gray-400 hover:text-gray-200"
-            }`}
-          >
-            <span>Conversation</span>
-            <CaretIcon
-              className={`transform transition-transform ${
-                conversationOpen ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-          {has4ConversationMessages && (
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-3 flex flex-wrap items-center justify-end gap-3 lg:flex-col lg:items-end lg:gap-4 w-full lg:w-auto">
+            <ThemeToggle />
+            <ProviderToggleButton />
+            <Suspense fallback={<div>Loading...</div>}>
+              <VoiceSelector />
+              {isMobile && <MobileMenu />}
+            </Suspense>
             <button
-              onClick={() => setBehindTheScenesOpen(!behindTheScenesOpen)}
+              onClick={toggleConversation}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                behindTheScenesOpen
+                conversationOpen
                   ? "bg-gray-800 text-gray-200"
                   : "text-gray-400 hover:text-gray-200"
               }`}
             >
-              <TerminalIcon />
-              <span>Behind the scenes</span>
+              <span>Conversation</span>
+              <CaretIcon
+                className={`transform transition-transform ${
+                  conversationOpen ? "rotate-180" : ""
+                }`}
+              />
             </button>
-          )}
+            {has4ConversationMessages && (
+              <button
+                onClick={() => setBehindTheScenesOpen(!behindTheScenesOpen)}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                  behindTheScenesOpen
+                    ? "bg-gray-800 text-gray-200"
+                    : "text-gray-400 hover:text-gray-200"
+                }`}
+              >
+                <TerminalIcon />
+                <span>Behind the scenes</span>
+              </button>
+            )}
+          </div>
         </div>
         </div>
 
