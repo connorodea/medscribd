@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import PDFDocument from "pdfkit";
-import { Document, Packer, Paragraph, TextRun } from "docx";
+import { Document, Packer, Paragraph, TextRun, ImageRun } from "docx";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import {
   buildMarkdownNote,
   buildSocialWorkMarkdown,
@@ -26,8 +28,12 @@ const toBuffer = (doc: PDFKit.PDFDocument) =>
     doc.on("error", reject);
   });
 
-const buildPdf = async (markdown: string, title: string) => {
+const buildPdf = async (markdown: string, title: string, logo?: Buffer) => {
   const doc = new PDFDocument({ margin: 48 });
+  if (logo) {
+    doc.image(logo, { fit: [180, 48] });
+    doc.moveDown();
+  }
   doc.fontSize(18).text(title);
   doc.moveDown();
   doc.fontSize(10).text(markdown);
@@ -35,15 +41,31 @@ const buildPdf = async (markdown: string, title: string) => {
   return toBuffer(doc);
 };
 
-const buildDocx = async (markdown: string, title: string) => {
+const buildDocx = async (markdown: string, title: string, logo?: Buffer) => {
+  const header = [];
+  if (logo) {
+    header.push(
+      new Paragraph({
+        children: [
+          new ImageRun({
+            data: logo,
+            transformation: { width: 180, height: 48 },
+          }),
+        ],
+      }),
+    );
+  }
+  header.push(
+    new Paragraph({
+      children: [new TextRun({ text: title, bold: true, size: 32 })],
+    }),
+    new Paragraph({ text: "" }),
+  );
   const doc = new Document({
     sections: [
       {
         children: [
-          new Paragraph({
-            children: [new TextRun({ text: title, bold: true, size: 32 })],
-          }),
-          new Paragraph({ text: "" }),
+          ...header,
           ...markdown.split("\n").map(
             (line) =>
               new Paragraph({
@@ -80,6 +102,13 @@ export async function POST(request: NextRequest) {
           verification: verification_needed,
           noteType: note_type,
         });
+  let logoBuffer: Buffer | undefined;
+  try {
+    const logoPath = path.join(process.cwd(), "public", "medscribd-logo.png");
+    logoBuffer = await readFile(logoPath);
+  } catch (error) {
+    logoBuffer = undefined;
+  }
 
   if (format === "md") {
     return new NextResponse(markdown, {
@@ -91,7 +120,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (format === "pdf") {
-    const pdfBuffer = await buildPdf(markdown, note_type);
+    const pdfBuffer = await buildPdf(markdown, note_type, logoBuffer);
     return new NextResponse(pdfBuffer, {
       headers: {
         "Content-Type": "application/pdf",
@@ -100,7 +129,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const docxBuffer = await buildDocx(markdown, note_type);
+  const docxBuffer = await buildDocx(markdown, note_type, logoBuffer);
   return new NextResponse(docxBuffer, {
     headers: {
       "Content-Type":

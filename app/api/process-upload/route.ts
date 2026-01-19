@@ -20,7 +20,7 @@ type CodeSuggestion = {
 const getUploadDir = () =>
   process.env.UPLOAD_DIR || path.join(process.cwd(), "uploads");
 
-const promptTemplate = `You are an AI medical scribe assistant for medscribd.com. Your role is to help healthcare providers (doctors and dentists) by converting clinical conversations into accurate, well-structured clinical documentation. You will listen to transcripts of patient encounters and generate professional medical notes.
+const promptTemplate = `You are an AI medical scribe assistant for medscribd.com. Your role is to help healthcare providers (doctors and dentists) by converting clinical conversations into accurate, well-structured clinical documentation.
 
 Here is the patient context and appointment information:
 <patient_context>
@@ -76,18 +76,12 @@ IMPORTANT LIMITATIONS:
 - If critical information seems missing, note this in your output
 - If you're uncertain about medical terminology or what was said, indicate this clearly
 
-Before writing the note, use the scratchpad to organize the key information:
-
-<scratchpad>
-- Identify the chief complaint
-- Extract key history elements
-- Note examination findings
-- Identify the assessment/diagnosis
-- Extract the treatment plan
-- Note any follow-up instructions
-</scratchpad>
-
-Now write the clinical note inside <clinical_note> tags. After the note, if there are any ambiguities, missing information, or items requiring provider verification, list them inside <verification_needed> tags.
+OUTPUT REQUIREMENTS:
+- Return only a JSON object that matches the provided schema.
+- clinical_note should be a clean, formatted note using Markdown headings (e.g., **SUBJECTIVE:**).
+- verification_needed should be a list of missing or ambiguous items needing clinician review.
+- icd10 and cpt should include code, description, and confidence when appropriate; return empty arrays if none.
+- Do not include any analysis, scratchpad, or tags.
 
 Begin your response now.`;
 
@@ -293,6 +287,7 @@ const runAnthropic = async (transcript: string, patientContext: string, noteType
       model,
       max_tokens: 1400,
       temperature: 0.2,
+      thinking: { type: "disabled" },
       messages: [{ role: "user", content: prompt }],
       output_format: {
         type: "json_schema",
