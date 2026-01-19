@@ -100,14 +100,29 @@ const transcribeAudio = async (audioBuffer: Buffer) => {
   return data?.results?.channels?.[0]?.alternatives?.[0]?.transcript || "";
 };
 
-const runNoteGeneration = async (transcript: string, templateId: keyof typeof templates) => {
+const parseJsonResponse = (content: string) => {
+  const parsed = JSON.parse(content) as {
+    soap: SoapNote;
+    icd10: CodeSuggestion[];
+    cpt: CodeSuggestion[];
+  };
+  return {
+    soap: parsed.soap,
+    icd10: parsed.icd10 || [],
+    cpt: parsed.cpt || [],
+    warning: null,
+  };
+};
+
+const runOpenAi = async (transcript: string, templateId: keyof typeof templates) => {
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
+  const model = process.env.OPENAI_MODEL;
+  if (!apiKey || !model) {
     return {
       soap: null,
       icd10: [],
       cpt: [],
-      warning: "OPENAI_API_KEY is not configured. Returning transcript only.",
+      warning: "OPENAI_API_KEY or OPENAI_MODEL is not configured. Returning transcript only.",
     };
   }
 
@@ -118,7 +133,7 @@ const runNoteGeneration = async (transcript: string, templateId: keyof typeof te
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
+      model,
       messages: [
         { role: "system", content: "You output valid JSON only." },
         { role: "user", content: buildPrompt(transcript, templateId) },
@@ -129,36 +144,83 @@ const runNoteGeneration = async (transcript: string, templateId: keyof typeof te
 
   if (!response.ok) {
     const errorBody = await response.text();
-    throw new Error(`LLM request failed: ${errorBody}`);
+    throw new Error(`OpenAI request failed: ${errorBody}`);
   }
 
   const data = await response.json();
   const content = data?.choices?.[0]?.message?.content;
   if (!content) {
-    throw new Error("LLM response was empty.");
+    throw new Error("OpenAI response was empty.");
   }
 
   try {
-    const parsed = JSON.parse(content) as {
-      soap: SoapNote;
-      icd10: CodeSuggestion[];
-      cpt: CodeSuggestion[];
-    };
-    return {
-      soap: parsed.soap,
-      icd10: parsed.icd10 || [],
-      cpt: parsed.cpt || [],
-      warning: null,
-    };
+    return parseJsonResponse(content);
   } catch (error) {
-    throw new Error("LLM response was not valid JSON.");
+    throw new Error("OpenAI response was not valid JSON.");
   }
 };
 
+const runAnthropic = async (transcript: string, templateId: keyof typeof templates) => {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const model = process.env.ANTHROPIC_MODEL;
+  if (!apiKey || !model) {
+    return {
+      soap: null,
+      icd10: [],
+      cpt: [],
+      warning: "ANTHROPIC_API_KEY or ANTHROPIC_MODEL is not configured. Returning transcript only.",
+    };
+  }
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 1400,
+      temperature: 0.2,
+      messages: [{ role: "user", content: buildPrompt(transcript, templateId) }],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`Anthropic request failed: ${errorBody}`);
+  }
+
+  const data = await response.json();
+  const content = data?.content?.find((item: { type: string }) => item.type === "text")?.text;
+  if (!content) {
+    throw new Error("Anthropic response was empty.");
+  }
+
+  try {
+    return parseJsonResponse(content);
+  } catch (error) {
+    throw new Error("Anthropic response was not valid JSON.");
+  }
+};
+
+const runNoteGeneration = async (
+  transcript: string,
+  templateId: keyof typeof templates,
+  provider: string,
+) => {
+  if (provider === "anthropic") {
+    return runAnthropic(transcript, templateId);
+  }
+  return runOpenAi(transcript, templateId);
+};
+
 export async function POST(request: NextRequest) {
-  const { storedAs, templateId } = (await request.json()) as {
+  const { storedAs, templateId, provider } = (await request.json()) as {
     storedAs?: string;
     templateId?: string;
+    provider?: string;
   };
 
   if (!storedAs) {
@@ -188,13 +250,15 @@ export async function POST(request: NextRequest) {
   const templateKey = (templateId && templateId in templates
     ? templateId
     : "primary_care") as keyof typeof templates;
-  const generated = await runNoteGeneration(transcript, templateKey);
+  const selectedProvider = provider || process.env.LLM_PROVIDER || "openai";
+  const generated = await runNoteGeneration(transcript, templateKey, selectedProvider);
 
   return NextResponse.json({
     transcript,
     soap: generated.soap,
     icd10: generated.icd10,
     cpt: generated.cpt,
+    provider: selectedProvider,
     warning: generated.warning,
   });
 }
