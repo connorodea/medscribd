@@ -2,50 +2,16 @@
 import { useState, Suspense } from "react";
 import Image from "next/image";
 import { App } from "../../components/App";
-import Intelligence from "../../components/Intelligence";
 import { stsBedrockConfig as stsConfig } from "../../lib/constants";
-import {
-  isConversationMessage,
-  useVoiceBot,
-} from "../../context/VoiceBotContextProvider";
+import { useVoiceBot } from "../../context/VoiceBotContextProvider";
 import { CaretIcon } from "../../components/icons/CaretIcon";
-import { PencilIcon } from "../../components/icons/PencilIcon";
-import InstructionInput from "../../components/InstructionInput";
-import { TerminalIcon } from "../../components/icons/TerminalIcon";
-import { BullhornIcon } from "../../components/icons/BullhornIcon";
-import ShareButtonsPanel from "../../components/ShareButtonsPanel";
-import * as WaitlistLink from "../../components/WaitlistLink";
-import { useStsQueryParams } from "../../hooks/UseStsQueryParams";
-import BehindTheScenes from "../../components/BehindTheScenes";
+import Conversation from "../../components/Conversation";
 import MedicalTranscription from "../../components/medical/MedicalTranscription";
 import Conversation from "../../components/Conversation";
 import VoiceSelector from "../../components/VoiceSelector/VoiceSelector";
 import { isMobile } from "react-device-detect";
-import PopupButton from "../../components/PopupButton";
 import MobileMenu from "../../components/MobileMenu";
 import ThemeToggle from "../../components/ThemeToggle";
-
-const DesktopMenuItems = () => {
-  const { instructions } = useStsQueryParams();
-  return (
-    <>
-      <PopupButton
-        buttonIcon={<PencilIcon />}
-        buttonText={
-          <span>Prompt {instructions && <span className="text-green-spring">*</span>}</span>
-        }
-        popupContent={<InstructionInput className="w-96" focusOnMount />}
-        tooltipText={instructions ? "Using your custom prompt. Click to edit." : null}
-      />
-      <PopupButton
-        buttonIcon={<BullhornIcon />}
-        buttonText="Share"
-        popupContent={<ShareButtonsPanel label="Share:" />}
-      />
-      <WaitlistLink.Plaintext />
-    </>
-  );
-};
 
 const ProviderToggleButton = () => {
   return (
@@ -61,11 +27,10 @@ const ProviderToggleButton = () => {
 export default function PreviewHome() {
   const { messages } = useVoiceBot();
   const [conversationOpen, setConversationOpen] = useState(false);
-  const [behindTheScenesOpen, setBehindTheScenesOpen] = useState(false);
 
   const toggleConversation = () => setConversationOpen(!conversationOpen);
 
-  const has4ConversationMessages = messages.filter(isConversationMessage).length > 3;
+  const hasConversation = messages.length > 0;
 
   return (
     <main className="min-h-screen">
@@ -102,7 +67,7 @@ export default function PreviewHome() {
           </div>
         </header>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
           <section className="space-y-6">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.6)] backdrop-blur">
               <div className="flex items-center justify-between gap-4">
@@ -138,15 +103,7 @@ export default function PreviewHome() {
           </section>
 
           <aside className="space-y-4 lg:sticky lg:top-8 h-fit">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.6)] backdrop-blur space-y-4">
-              <Intelligence />
-              {!isMobile && (
-                <Suspense fallback={<div>Loading...</div>}>
-                  <DesktopMenuItems />
-                </Suspense>
-              )}
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.6)] backdrop-blur space-y-2">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.6)] backdrop-blur">
               <button
                 onClick={toggleConversation}
                 className={`flex w-full items-center justify-between gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
@@ -162,19 +119,11 @@ export default function PreviewHome() {
                   }`}
                 />
               </button>
-              {has4ConversationMessages && (
-                <button
-                  onClick={() => setBehindTheScenesOpen(!behindTheScenesOpen)}
-                  className={`flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                    behindTheScenesOpen
-                      ? "bg-gray-800 text-gray-200"
-                      : "text-gray-400 hover:text-gray-200"
-                  }`}
-                >
-                  <TerminalIcon />
-                  <span>Behind the scenes</span>
-                </button>
-              )}
+              <div className="mt-3 text-xs text-brand-mist/60">
+                {hasConversation
+                  ? "View the live conversation transcript."
+                  : "Start recording to populate the conversation."}
+              </div>
             </div>
           </aside>
         </div>
@@ -183,11 +132,6 @@ export default function PreviewHome() {
         {conversationOpen && (
           <Suspense fallback={<div>Loading...</div>}>
             <Conversation toggleConversation={toggleConversation} />
-          </Suspense>
-        )}
-        {behindTheScenesOpen && (
-          <Suspense fallback={<div>Loading...</div>}>
-            <BehindTheScenes onClose={() => setBehindTheScenesOpen(false)} />
           </Suspense>
         )}
       </div>
