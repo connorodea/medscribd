@@ -83,7 +83,8 @@ export default function PreviewHome() {
         {/* Center panel */}
         <div className="mx-auto max-w-3xl relative">
           <div className="text-center">
-            <div className="flex justify-center mb-3">
+            <div className="flex flex-col items-center gap-3 mb-3">
+              <img src="/medscribd-logo.png" alt="medscribd logo" className="h-10 w-auto" />
               <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5">
                 <span className="text-xs uppercase tracking-[0.3em] text-brand-mist/80">medscribd</span>
                 <span className="h-1 w-1 rounded-full bg-brand-amber" />

@@ -9,6 +9,35 @@ type UploadedFile = {
   type: string;
 };
 
+type SoapNote = {
+  subjective: string;
+  objective: string;
+  assessment: string;
+  plan: string;
+};
+
+type CodeSuggestion = {
+  code: string;
+  description: string;
+  confidence: "low" | "medium" | "high";
+};
+
+type ProcessResult = {
+  transcript: string;
+  soap: SoapNote | null;
+  icd10: CodeSuggestion[];
+  cpt: CodeSuggestion[];
+  warning?: string | null;
+};
+
+const templates = [
+  { id: "primary_care", label: "Primary Care" },
+  { id: "cardiology", label: "Cardiology" },
+  { id: "orthopedics", label: "Orthopedics" },
+  { id: "psychiatry", label: "Psychiatry" },
+  { id: "physical_therapy", label: "Physical Therapy" },
+] as const;
+
 const formatBytes = (value: number) => {
   if (value < 1024) return `${value} B`;
   if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
@@ -19,6 +48,9 @@ export default function UploadNotes() {
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [uploaded, setUploaded] = useState<UploadedFile[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState(templates[0].id);
+  const [processing, setProcessing] = useState<Record<string, boolean>>({});
+  const [results, setResults] = useState<Record<string, ProcessResult>>({});
 
   const onUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -51,41 +83,134 @@ export default function UploadNotes() {
     }
   };
 
+  const onProcess = async (file: UploadedFile) => {
+    setProcessing((prev) => ({ ...prev, [file.storedAs]: true }));
+    setMessage(null);
+    try {
+      const response = await fetch("/api/process-upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ storedAs: file.storedAs, templateId: selectedTemplate }),
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.error || "Processing failed.");
+      }
+      const data = (await response.json()) as ProcessResult;
+      setResults((prev) => ({ ...prev, [file.storedAs]: data }));
+      if (data.warning) {
+        setMessage(data.warning);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Processing failed.";
+      setMessage(message);
+    } finally {
+      setProcessing((prev) => ({ ...prev, [file.storedAs]: false }));
+    }
+  };
+
   return (
     <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-left">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="text-sm font-semibold text-brand-cloud">Upload notes or audio</div>
           <div className="text-xs text-brand-mist/70">
-            Attach prior notes, PDFs, or audio files to reference during the visit.
+            Upload text or audio files to generate a SOAP note and coding suggestions.
           </div>
         </div>
-        <label className="inline-flex cursor-pointer items-center rounded-full bg-brand-amber px-4 py-2 text-xs font-semibold text-brand-ink hover:bg-[#f2a94a] transition-colors">
-          <input
-            type="file"
-            multiple
-            accept=".txt,.md,.pdf,.doc,.docx,audio/*"
-            className="hidden"
-            onChange={onUpload}
-            disabled={isUploading}
-          />
-          {isUploading ? "Uploading..." : "Upload files"}
-        </label>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <select
+            value={selectedTemplate}
+            onChange={(event) => setSelectedTemplate(event.target.value)}
+            className="rounded-full border border-white/10 bg-white/10 px-3 py-2 text-xs text-brand-cloud"
+          >
+            {templates.map((template) => (
+              <option key={template.id} value={template.id} className="text-brand-ink">
+                {template.label}
+              </option>
+            ))}
+          </select>
+          <label className="inline-flex cursor-pointer items-center rounded-full bg-brand-amber px-4 py-2 text-xs font-semibold text-brand-ink hover:bg-[#f2a94a] transition-colors">
+            <input
+              type="file"
+              multiple
+              accept=".txt,.md,audio/*"
+              className="hidden"
+              onChange={onUpload}
+              disabled={isUploading}
+            />
+            {isUploading ? "Uploading..." : "Upload files"}
+          </label>
+        </div>
       </div>
       {message && <div className="mt-3 text-xs text-brand-mist/80">{message}</div>}
       {uploaded.length > 0 && (
-        <div className="mt-3 space-y-2 text-xs text-brand-mist/70">
-          {uploaded.slice(0, 4).map((file) => (
-            <div key={file.storedAs} className="flex items-center justify-between">
-              <span className="text-brand-cloud">{file.name}</span>
-              <span>{formatBytes(file.size)}</span>
-            </div>
-          ))}
-          {uploaded.length > 4 && (
-            <div className="text-brand-mist/60">
-              + {uploaded.length - 4} more files uploaded
-            </div>
-          )}
+        <div className="mt-4 space-y-4 text-xs text-brand-mist/70">
+          {uploaded.map((file) => {
+            const result = results[file.storedAs];
+            const isProcessing = processing[file.storedAs];
+            return (
+              <div key={file.storedAs} className="rounded-xl border border-white/10 bg-white/5 p-3">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <div className="text-brand-cloud">{file.name}</div>
+                    <div>{formatBytes(file.size)}</div>
+                  </div>
+                  <button
+                    onClick={() => onProcess(file)}
+                    className="inline-flex items-center justify-center rounded-full border border-brand-mist/30 px-3 py-1 text-xs font-semibold text-brand-cloud hover:border-brand-mist/70 transition-colors"
+                    disabled={isProcessing}
+                  >
+                    {isProcessing ? "Processing..." : "Generate note"}
+                  </button>
+                </div>
+                {result && (
+                  <div className="mt-3 space-y-3 text-[11px] text-brand-mist/70">
+                    <div className="rounded-lg border border-white/10 bg-[#0b1220] p-3">
+                      <div className="text-brand-cloud font-semibold">SOAP Note</div>
+                      {result.soap ? (
+                        <pre className="mt-2 whitespace-pre-wrap text-[11px] text-brand-mist/80 font-fira">{`S: ${result.soap.subjective}\nO: ${result.soap.objective}\nA: ${result.soap.assessment}\nP: ${result.soap.plan}`}</pre>
+                      ) : (
+                        <div className="mt-2">Transcript ready. Configure OPENAI_API_KEY to generate SOAP notes.</div>
+                      )}
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                        <div className="text-brand-cloud font-semibold">ICD-10 Suggestions</div>
+                        {result.icd10.length ? (
+                          <ul className="mt-2 space-y-1">
+                            {result.icd10.map((code) => (
+                              <li key={`${code.code}-${code.description}`}>
+                                <span className="text-brand-cloud">{code.code}</span> {code.description}{" "}
+                                <span className="text-brand-mist/50">({code.confidence})</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <div className="mt-2">No suggestions yet.</div>
+                        )}
+                      </div>
+                      <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                        <div className="text-brand-cloud font-semibold">CPT Suggestions</div>
+                        {result.cpt.length ? (
+                          <ul className="mt-2 space-y-1">
+                            {result.cpt.map((code) => (
+                              <li key={`${code.code}-${code.description}`}>
+                                <span className="text-brand-cloud">{code.code}</span> {code.description}{" "}
+                                <span className="text-brand-mist/50">({code.confidence})</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <div className="mt-2">No suggestions yet.</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

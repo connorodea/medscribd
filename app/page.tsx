@@ -60,9 +60,11 @@ export default function LandingPage() {
       <div className="max-w-screen-xl mx-auto px-6 py-8">
         <nav className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-lg font-semibold tracking-wide text-brand-cloud font-sora">
-              medscribd
-            </span>
+            <img
+              src="/medscribd-logo.png"
+              alt="medscribd logo"
+              className="h-8 w-auto"
+            />
             <span className="hidden sm:inline text-xs uppercase tracking-[0.3em] text-brand-mist/60">
               AI medical scribe
             </span>

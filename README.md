@@ -59,6 +59,10 @@ Before you begin, ensure you have the following:
    ```bash
    export DEEPGRAM_API_KEY=your_deepgram_api_key_here
    ```
+   Optional (for SOAP + ICD/CPT generation from uploads):
+   ```bash
+   export OPENAI_API_KEY=your_openai_api_key_here
+   ```
    Or copy the example file:
    ```bash
    cp .env.local.example .env.local
