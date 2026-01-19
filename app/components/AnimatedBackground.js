@@ -27,8 +27,7 @@ const AnimatedBackground = ({ children }) => {
               right: "-10%",
               width: "60%",
               height: "60%",
-              background:
-                "radial-gradient(circle, rgba(244, 184, 96, 0.3) 0%, rgba(244, 184, 96, 0) 60%)",
+              background: "radial-gradient(circle, var(--glow-amber) 0%, rgba(0, 0, 0, 0) 60%)",
               filter: "blur(10px)",
             }}
           />
@@ -39,8 +38,7 @@ const AnimatedBackground = ({ children }) => {
               left: "-15%",
               width: "70%",
               height: "70%",
-              background:
-                "radial-gradient(circle, rgba(15, 93, 93, 0.45) 0%, rgba(15, 93, 93, 0) 65%)",
+              background: "radial-gradient(circle, var(--glow-teal) 0%, rgba(0, 0, 0, 0) 65%)",
               filter: "blur(18px)",
             }}
           />
@@ -52,7 +50,7 @@ const AnimatedBackground = ({ children }) => {
               width: "120px",
               height: "120px",
               borderRadius: "999px",
-              border: "1px solid rgba(232, 243, 241, 0.15)",
+              border: "1px solid var(--glow-ring)",
               background: "rgba(232, 243, 241, 0.04)",
               transform: "rotate(18deg)",
             }}

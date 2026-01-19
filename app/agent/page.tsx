@@ -26,6 +26,7 @@ import { isMobile } from "react-device-detect";
 import PopupButton from "../components/PopupButton";
 import MobileMenu from "../components/MobileMenu";
 import UploadNotes from "../components/UploadNotes";
+import ThemeToggle from "../components/ThemeToggle";
 
 const DesktopMenuItems = () => {
   const { instructions } = useStsQueryParams();
@@ -129,6 +130,7 @@ export default function Home() {
 
         {/* Right panel */}
         <div className="fixed right-8 top-8 flex flex-col items-end space-y-4">
+          <ThemeToggle />
           <ProviderToggleButton />
           <Suspense fallback={<div>Loading...</div>}>
             <VoiceSelector />

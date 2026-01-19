@@ -1,4 +1,5 @@
 import Image from "next/image";
+import ThemeToggle from "./components/ThemeToggle";
 
 const features = [
   {
@@ -100,6 +101,7 @@ export default function LandingPage() {
             </a>
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <a
               href="/agent"
               className="hidden sm:inline-flex items-center rounded-full border border-brand-mist/30 px-4 py-2 text-sm text-brand-cloud hover:border-brand-mist/60 transition-colors"
