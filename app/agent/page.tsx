@@ -24,6 +24,7 @@ import VoiceSelector from "../components/VoiceSelector/VoiceSelector";
 import { isMobile } from "react-device-detect";
 import PopupButton from "../components/PopupButton";
 import MobileMenu from "../components/MobileMenu";
+import UploadNotes from "../components/UploadNotes";
 
 const DesktopMenuItems = () => {
   const { instructions } = useStsQueryParams();
@@ -110,6 +111,7 @@ export default function Home() {
                   className="flex-shrink-0 h-[130px] opacity-75 disabled:opacity-50"
                   requiresUserActionToInitialize={isMobile}
                 />
+                <UploadNotes />
                 <MedicalTranscription />
               </Suspense>
             </VoiceBotProvider>
