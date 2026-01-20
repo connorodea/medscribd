@@ -232,85 +232,85 @@ export default function DrugDispatch() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Drug Dispatch</h2>
+        <h2 className="text-lg font-semibold text-foreground">Drug Dispatch</h2>
         <div className="flex items-center space-x-2">
           <div
             className={`h-3 w-3 rounded-full ${
-              isRecording && isActiveDispatch ? 'bg-green-500 animate-pulse' : 'bg-gray-300'
+              isRecording && isActiveDispatch ? 'bg-success animate-pulse' : 'bg-muted'
             }`}
           />
-          <span className="text-sm text-gray-400">
+          <span className="text-sm text-muted-foreground">
             {isActiveDispatch ? (isRecording ? "Recording prescription..." : "Prescription started") : "Ready to start new prescription"}
           </span>
         </div>
       </div>
 
       <div className="space-y-4">
-        <div className="rounded-lg border border-gray-800 p-4 bg-gray-900/50">
+        <div className="rounded-lg border border-border bg-background p-4 shadow-card">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">Patient Name</label>
+              <label className="block text-sm font-medium text-foreground">Patient Name</label>
               <input
                 type="text"
                 value={currentDispatch.patientName}
                 onChange={(e) => setCurrentDispatch(prev => ({ ...prev, patientName: e.target.value }))}
-                className="w-full px-3 py-2 bg-gray-800 rounded-md text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 placeholder="Enter patient name"
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">Medical Record Number (MRN)</label>
+              <label className="block text-sm font-medium text-foreground">Medical Record Number (MRN)</label>
               <input
                 type="text"
                 value={currentDispatch.mrn}
                 onChange={(e) => setCurrentDispatch(prev => ({ ...prev, mrn: e.target.value }))}
-                className="w-full px-3 py-2 bg-gray-800 rounded-md text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 placeholder="Enter MRN"
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">Medication</label>
+              <label className="block text-sm font-medium text-foreground">Medication</label>
               <input
                 type="text"
                 value={currentDispatch.medication}
                 onChange={(e) => setCurrentDispatch(prev => ({ ...prev, medication: e.target.value }))}
-                className="w-full px-3 py-2 bg-gray-800 rounded-md text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 placeholder="Enter medication name"
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">Dosage</label>
+              <label className="block text-sm font-medium text-foreground">Dosage</label>
               <input
                 type="text"
                 value={currentDispatch.dosage}
                 onChange={(e) => setCurrentDispatch(prev => ({ ...prev, dosage: e.target.value }))}
-                className="w-full px-3 py-2 bg-gray-800 rounded-md text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 placeholder="Enter dosage"
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">Frequency</label>
+              <label className="block text-sm font-medium text-foreground">Frequency</label>
               <input
                 type="text"
                 value={currentDispatch.frequency}
                 onChange={(e) => setCurrentDispatch(prev => ({ ...prev, frequency: e.target.value }))}
-                className="w-full px-3 py-2 bg-gray-800 rounded-md text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 placeholder="Enter frequency"
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">Pharmacy</label>
+              <label className="block text-sm font-medium text-foreground">Pharmacy</label>
               <input
                 type="text"
                 value={currentDispatch.pharmacy}
                 onChange={(e) => setCurrentDispatch(prev => ({ ...prev, pharmacy: e.target.value }))}
-                className="w-full px-3 py-2 bg-gray-800 rounded-md text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 placeholder="Enter pharmacy"
               />
             </div>
           </div>
           <div className="flex justify-between mt-4">
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-muted-foreground">
               {isActiveDispatch ? (isRecording ? "Recording prescription..." : "Prescription started") : "Say 'Start Drug Dispatch' to begin"}
             </div>
             <div className="space-x-2">
@@ -323,13 +323,13 @@ export default function DrugDispatch() {
                   frequency: '',
                   pharmacy: '',
                 })}
-                className="px-4 py-2 text-gray-400 hover:text-gray-200"
+                className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
               >
                 Clear
               </button>
               <button
                 onClick={handleDispatch}
-                className="px-4 py-2 bg-gray-800 text-gray-200 rounded hover:bg-gray-700"
+                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
                 disabled={!isActiveDispatch}
               >
                 Dispatch
@@ -340,22 +340,22 @@ export default function DrugDispatch() {
 
         <div className="space-y-2">
           {dispatches.map((dispatch) => (
-            <div key={dispatch.id} className="rounded-lg border border-gray-800 p-4 bg-gray-900/50">
+            <div key={dispatch.id} className="rounded-lg border border-border bg-muted/30 p-4">
               <div className="flex justify-between items-start">
                 <div>
                   <div className="mb-2">
-                    <h3 className="font-medium text-gray-200">{dispatch.patientName}</h3>
+                    <h3 className="font-medium text-foreground">{dispatch.patientName}</h3>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-gray-400">MRN: {dispatch.mrn}</p>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-muted-foreground">MRN: {dispatch.mrn}</p>
+                    <p className="text-sm text-muted-foreground">
                       Medication: {dispatch.medication}
                     </p>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       {dispatch.dosage} - {dispatch.frequency}
                     </p>
-                    <p className="text-sm text-gray-400">Pharmacy: {dispatch.pharmacy}</p>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-muted-foreground">Pharmacy: {dispatch.pharmacy}</p>
+                    <p className="text-sm text-muted-foreground">
                       Created: {new Date(dispatch.timestamp).toLocaleString()}
                     </p>
                   </div>
@@ -365,8 +365,8 @@ export default function DrugDispatch() {
                     <span
                       className={`px-2 py-1 text-xs rounded ${
                         dispatch.status === 'dispatched'
-                          ? 'bg-green-900/50 text-green-200'
-                          : 'bg-yellow-900/50 text-yellow-200'
+                          ? 'bg-success/10 text-success'
+                          : 'bg-warning/10 text-warning'
                       }`}
                     >
                       {dispatch.status}
@@ -374,18 +374,18 @@ export default function DrugDispatch() {
                     <button
                       onClick={() =>
                         handleStatusChange(
-                          dispatch.id,
-                          dispatch.status === 'pending' ? 'dispatched' : 'pending'
-                        )
+                        dispatch.id,
+                        dispatch.status === 'pending' ? 'dispatched' : 'pending'
+                      )
                       }
-                      className="text-gray-400 hover:text-gray-200"
+                      className="text-sm text-muted-foreground hover:text-foreground"
                     >
                       {dispatch.status === 'pending' ? 'Mark Dispatched' : 'Mark Pending'}
                     </button>
                   </div>
                   <button
                     onClick={() => handleDelete(dispatch.id)}
-                    className="text-gray-500 hover:text-red-500 transition-colors"
+                    className="text-muted-foreground transition-colors hover:text-destructive"
                     title="Delete dispatch"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

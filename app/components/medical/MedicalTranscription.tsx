@@ -176,16 +176,16 @@ export default function MedicalTranscription() {
         console.log('Tab.Group onChange called with index:', index);
         handleModeSwitch(index);
       }}>
-        <Tab.List className="flex w-full gap-2 rounded-full border border-white/10 bg-white/5 p-1">
-          {Object.keys(categories).map((category) => (
-            <Tab
-              key={category}
-              className={({ selected }) =>
-                classNames(
-                  'w-full rounded-full py-2 text-sm font-medium leading-5 transition-all duration-150 focus:outline-none',
-                  selected
-                    ? 'bg-white/10 text-gray-100'
-                    : 'text-gray-400 hover:bg-white/5 hover:text-gray-100'
+      <Tab.List className="flex w-full gap-2 rounded-full border border-border bg-muted/40 p-1">
+        {Object.keys(categories).map((category) => (
+          <Tab
+            key={category}
+            className={({ selected }) =>
+              classNames(
+                'w-full rounded-full py-2 text-sm font-medium leading-5 transition-all duration-150 focus:outline-none',
+                selected
+                    ? 'bg-background text-foreground shadow-soft'
+                    : 'text-muted-foreground hover:bg-background/70 hover:text-foreground'
                 )
               }
             >
@@ -198,7 +198,7 @@ export default function MedicalTranscription() {
             <Tab.Panel
               key={idx}
               className={classNames(
-                'rounded-2xl border border-white/10 bg-white/5 p-5 text-gray-200 focus:outline-none'
+                'rounded-2xl border border-border bg-muted/20 p-5 text-foreground focus:outline-none'
               )}
             >
               <Component />
@@ -207,11 +207,11 @@ export default function MedicalTranscription() {
         </Tab.Panels>
       </Tab.Group>
 
-      <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
-        <h3 className="text-sm font-medium text-gray-300">Voice Commands</h3>
+      <div className="mt-4 rounded-2xl border border-border bg-muted/30 p-4">
+        <h3 className="text-sm font-medium text-foreground">Voice Commands</h3>
         <div className="mt-2 space-y-4">
           <div>
-            <ul className="text-sm text-gray-400">
+            <ul className="text-sm text-muted-foreground">
               <li>• &quot;Start Clinical Note&quot; - Switch to Clinical Notes</li>
               <li>• &quot;Start Drug Dispatch&quot; - Switch to Drug Dispatch</li>
               <li>• &quot;Start Scheduling&quot; - Switch to Scheduling</li>
@@ -221,8 +221,8 @@ export default function MedicalTranscription() {
             {/* Clinical Note Commands - Only show when Clinical Notes tab is active */}
             {selectedIndex === 0 && (
               <div>
-                <h4 className="text-sm font-medium text-gray-400 mb-1">Clinical Note Commands:</h4>
-                <ul className="text-sm text-gray-400 space-y-1">
+                <h4 className="text-sm font-medium text-foreground mb-1">Clinical Note Commands:</h4>
+                <ul className="text-sm text-muted-foreground space-y-1">
                   <li>• Demographics:</li>
                   <li className="ml-4">- &quot;Patient name is [name]&quot;</li>
                   <li className="ml-4">- &quot;Date of birth is [date]&quot;</li>
@@ -250,8 +250,8 @@ export default function MedicalTranscription() {
             {/* Drug Dispatch Commands - Only show when Drug Dispatch tab is active */}
             {selectedIndex === 1 && (
               <div>
-                <h4 className="text-sm font-medium text-gray-400 mb-1">Drug Dispatch Commands:</h4>
-                <ul className="text-sm text-gray-400 space-y-1">
+                <h4 className="text-sm font-medium text-foreground mb-1">Drug Dispatch Commands:</h4>
+                <ul className="text-sm text-muted-foreground space-y-1">
                   <li>• Patient Information:</li>
                   <li className="ml-4">- &quot;Patient name is [name]&quot;</li>
                   <li className="ml-4">- &quot;MRN is [number]&quot;</li>
@@ -270,8 +270,8 @@ export default function MedicalTranscription() {
             {/* Scheduling Commands - Only show when Scheduling tab is active */}
             {selectedIndex === 2 && (
               <div>
-                <h4 className="text-sm font-medium text-gray-400 mb-1">Scheduling Commands:</h4>
-                <ul className="text-sm text-gray-400 space-y-1">
+                <h4 className="text-sm font-medium text-foreground mb-1">Scheduling Commands:</h4>
+                <ul className="text-sm text-muted-foreground space-y-1">
                   <li>• Appointment Details:</li>
                   <li className="ml-4">- &quot;Type is [appointment type]&quot;</li>
                   <li className="ml-4">- &quot;Date is [date]&quot;</li>

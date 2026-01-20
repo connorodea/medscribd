@@ -168,18 +168,18 @@ export default function UploadNotes() {
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-left shadow-[0_24px_60px_-40px_rgba(0,0,0,0.6)] backdrop-blur">
+    <div className="rounded-2xl border border-border bg-card p-5 text-left shadow-card">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <div className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-mist/70">
+          <div className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
             Upload & Generate
           </div>
-          <h2 className="text-lg font-semibold text-brand-cloud">Files & context</h2>
-          <p className="mt-1 text-xs text-brand-mist/70">
+          <h2 className="text-lg font-semibold text-foreground">Files & context</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
             Upload audio or notes, add patient context, and generate structured outputs.
           </p>
         </div>
-        <label className="inline-flex cursor-pointer items-center rounded-full bg-brand-amber px-4 py-2 text-xs font-semibold text-brand-ink hover:bg-[#f2a94a] transition-colors">
+        <label className="inline-flex cursor-pointer items-center rounded-full gradient-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-soft transition-shadow hover:shadow-elevated">
           <input
             type="file"
             multiple
@@ -196,10 +196,10 @@ export default function UploadNotes() {
         <select
           value={selectedTemplate}
           onChange={(event) => setSelectedTemplate(event.target.value)}
-          className="rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-xs text-brand-cloud"
+          className="rounded-xl border border-border bg-background px-4 py-3 text-xs text-foreground"
         >
           {templates.map((template) => (
-            <option key={template.id} value={template.id} className="text-brand-ink">
+            <option key={template.id} value={template.id} className="text-foreground">
               {template.label}
             </option>
           ))}
@@ -209,12 +209,12 @@ export default function UploadNotes() {
           value={noteType}
           onChange={(event) => setNoteType(event.target.value)}
           placeholder="Note type (e.g., SOAP Note)"
-          className="rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-xs text-brand-cloud placeholder:text-brand-mist/50"
+          className="rounded-xl border border-border bg-background px-4 py-3 text-xs text-foreground placeholder:text-muted-foreground"
         />
       </div>
 
       <div className="mt-3">
-        <label className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-mist/70">
+        <label className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
           Patient context
         </label>
         <textarea
@@ -222,48 +222,48 @@ export default function UploadNotes() {
           onChange={(event) => setPatientContext(event.target.value)}
           placeholder="Patient context or appointment info (optional)"
           rows={4}
-          className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-brand-cloud placeholder:text-brand-mist/50"
+          className="mt-2 w-full rounded-xl border border-border bg-background p-3 text-xs text-foreground placeholder:text-muted-foreground"
         />
       </div>
-      {message && <div className="mt-3 text-xs text-brand-mist/80">{message}</div>}
+      {message && <div className="mt-3 text-xs text-muted-foreground">{message}</div>}
       {uploaded.length > 0 && (
-        <div className="mt-5 space-y-4 text-xs text-brand-mist/70">
+        <div className="mt-5 space-y-4 text-xs text-muted-foreground">
           {uploaded.map((file) => {
             const result = results[file.storedAs];
             const isProcessing = processing[file.storedAs];
             return (
               <div
                 key={file.storedAs}
-                className="rounded-xl border border-white/10 bg-white/5 p-4"
+                className="rounded-xl border border-border bg-muted/40 p-4"
               >
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <div className="text-brand-cloud">{file.name}</div>
-                    <div className="text-brand-mist/60">{formatBytes(file.size)}</div>
+                    <div className="text-foreground">{file.name}</div>
+                    <div className="text-muted-foreground">{formatBytes(file.size)}</div>
                   </div>
                   <button
                     onClick={() => onProcess(file)}
-                    className="inline-flex items-center justify-center rounded-full border border-brand-mist/30 px-4 py-2 text-xs font-semibold text-brand-cloud hover:border-brand-mist/70 transition-colors"
+                    className="inline-flex items-center justify-center rounded-full border border-border px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:border-primary/40 hover:text-primary"
                     disabled={isProcessing}
                   >
                     {isProcessing ? "Processing..." : "Generate note"}
                   </button>
                 </div>
                 {result && (
-                  <div className="mt-4 space-y-3 text-[11px] text-brand-mist/70">
+                  <div className="mt-4 space-y-3 text-[11px] text-muted-foreground">
                     {result.error && (
-                      <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-red-200">
+                      <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-red-600">
                         {result.error}
                       </div>
                     )}
-                    <div className="rounded-lg border border-white/10 bg-[#0b1220] p-3">
-                      <div className="text-brand-cloud font-semibold">Clinical Note</div>
+                    <div className="rounded-lg border border-border bg-background p-3">
+                      <div className="text-foreground font-semibold">Clinical Note</div>
                       {result.clinical_note ? (
-                        <pre className="mt-2 whitespace-pre-wrap text-[11px] text-brand-mist/80 font-fira">
+                        <pre className="mt-2 whitespace-pre-wrap text-[11px] text-muted-foreground font-fira">
                           {result.clinical_note}
                         </pre>
                       ) : result.soap ? (
-                        <pre className="mt-2 whitespace-pre-wrap text-[11px] text-brand-mist/80 font-fira">{`S: ${result.soap.subjective}\nO: ${result.soap.objective}\nA: ${result.soap.assessment}\nP: ${result.soap.plan}`}</pre>
+                        <pre className="mt-2 whitespace-pre-wrap text-[11px] text-muted-foreground font-fira">{`S: ${result.soap.subjective}\nO: ${result.soap.objective}\nA: ${result.soap.assessment}\nP: ${result.soap.plan}`}</pre>
                       ) : (
                         <div className="mt-2">Transcript ready. Configure LLM keys to generate notes.</div>
                       )}
@@ -271,26 +271,26 @@ export default function UploadNotes() {
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => handleExport(result, "pdf")}
-                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-brand-cloud hover:border-brand-mist/70"
+                        className="rounded-full border border-border bg-background px-3 py-1 text-[11px] text-foreground hover:border-primary/40"
                       >
                         Export PDF
                       </button>
                       <button
                         onClick={() => handleExport(result, "docx")}
-                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-brand-cloud hover:border-brand-mist/70"
+                        className="rounded-full border border-border bg-background px-3 py-1 text-[11px] text-foreground hover:border-primary/40"
                       >
                         Export DOCX
                       </button>
                       <button
                         onClick={() => handleExport(result, "md")}
-                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-brand-cloud hover:border-brand-mist/70"
+                        className="rounded-full border border-border bg-background px-3 py-1 text-[11px] text-foreground hover:border-primary/40"
                       >
                         Export Markdown
                       </button>
                     </div>
                     {result.verification_needed && result.verification_needed.length > 0 && (
-                      <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                        <div className="text-brand-cloud font-semibold">Verification Needed</div>
+                      <div className="rounded-lg border border-border bg-muted/40 p-3">
+                        <div className="text-foreground font-semibold">Verification Needed</div>
                         <ul className="mt-2 space-y-1">
                           {result.verification_needed.map((item, index) => (
                             <li key={`${item}-${index}`}>• {item}</li>
@@ -299,14 +299,14 @@ export default function UploadNotes() {
                       </div>
                     )}
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                        <div className="text-brand-cloud font-semibold">ICD-10 Suggestions</div>
+                      <div className="rounded-lg border border-border bg-muted/40 p-3">
+                        <div className="text-foreground font-semibold">ICD-10 Suggestions</div>
                         {result.icd10.length ? (
                           <ul className="mt-2 space-y-1">
                             {result.icd10.map((code) => (
                               <li key={`${code.code}-${code.description}`}>
-                                <span className="text-brand-cloud">{code.code}</span> {code.description}{" "}
-                                <span className="text-brand-mist/50">({code.confidence})</span>
+                                <span className="text-foreground">{code.code}</span> {code.description}{" "}
+                                <span className="text-muted-foreground">({code.confidence})</span>
                               </li>
                             ))}
                           </ul>
@@ -314,14 +314,14 @@ export default function UploadNotes() {
                           <div className="mt-2">No suggestions yet.</div>
                         )}
                       </div>
-                      <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                        <div className="text-brand-cloud font-semibold">CPT Suggestions</div>
+                      <div className="rounded-lg border border-border bg-muted/40 p-3">
+                        <div className="text-foreground font-semibold">CPT Suggestions</div>
                         {result.cpt.length ? (
                           <ul className="mt-2 space-y-1">
                             {result.cpt.map((code) => (
                               <li key={`${code.code}-${code.description}`}>
-                                <span className="text-brand-cloud">{code.code}</span> {code.description}{" "}
-                                <span className="text-brand-mist/50">({code.confidence})</span>
+                                <span className="text-foreground">{code.code}</span> {code.description}{" "}
+                                <span className="text-muted-foreground">({code.confidence})</span>
                               </li>
                             ))}
                           </ul>

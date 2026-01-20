@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap");
+
 :root {
   --color-ink: #0f172a;
   --color-teal: #0f5d5d;
@@ -43,6 +45,205 @@ body {
   color: var(--page-text);
   scroll-behavior: smooth;
 }
+
+.medscribe-ui {
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 262 83% 58%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 262 40% 96%;
+  --secondary-foreground: 262 83% 45%;
+  --muted: 220 14% 96%;
+  --muted-foreground: 220 9% 46%;
+  --accent: 262 40% 95%;
+  --accent-foreground: 262 83% 45%;
+  --success: 152 82% 39%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 262 83% 58%;
+  --radius: 0.625rem;
+  --ai-bubble: 262 40% 97%;
+  --user-bubble: 262 83% 58%;
+  --sidebar-background: 262 30% 99%;
+  --sidebar-foreground: 222 47% 11%;
+  --sidebar-primary: 262 83% 58%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 262 40% 96%;
+  --sidebar-accent-foreground: 222 47% 11%;
+  --sidebar-border: 220 13% 91%;
+  --sidebar-ring: 262 83% 58%;
+  --gradient-success: linear-gradient(
+    135deg,
+    hsl(152 82% 39%) 0%,
+    hsl(160 76% 45%) 100%
+  );
+  --gradient-primary: linear-gradient(
+    135deg,
+    hsl(262 83% 58%) 0%,
+    hsl(280 85% 65%) 100%
+  );
+  --gradient-subtle: linear-gradient(
+    180deg,
+    hsl(0 0% 100%) 0%,
+    hsl(220 14% 98%) 100%
+  );
+  --gradient-sidebar: linear-gradient(
+    180deg,
+    hsl(262 40% 99%) 0%,
+    hsl(220 14% 97%) 100%
+  );
+  --shadow-xs: 0 1px 2px 0 hsl(220 13% 20% / 0.05);
+  --shadow-soft: 0 1px 3px 0 hsl(220 13% 20% / 0.08),
+    0 1px 2px -1px hsl(220 13% 20% / 0.08);
+  --shadow-elevated: 0 4px 6px -1px hsl(220 13% 20% / 0.08),
+    0 2px 4px -2px hsl(220 13% 20% / 0.06);
+  --shadow-lg: 0 10px 15px -3px hsl(220 13% 20% / 0.08),
+    0 4px 6px -4px hsl(220 13% 20% / 0.06);
+  --shadow-card: 0 0 0 1px hsl(220 13% 91%), 0 2px 4px hsl(220 13% 20% / 0.04);
+  --shadow-card-hover: 0 0 0 1px hsl(262 83% 58% / 0.3),
+    0 4px 12px hsl(262 83% 58% / 0.08);
+  --shadow-glow: 0 0 20px hsl(262 83% 58% / 0.15);
+  --shadow-glow-success: 0 0 20px hsl(152 82% 39% / 0.2);
+}
+
+.dark .medscribe-ui {
+  --background: 222 47% 6%;
+  --foreground: 210 40% 98%;
+  --card: 222 47% 9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222 47% 9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 262 83% 65%;
+  --primary-foreground: 222 47% 6%;
+  --secondary: 222 30% 15%;
+  --secondary-foreground: 262 70% 75%;
+  --muted: 222 30% 14%;
+  --muted-foreground: 220 9% 60%;
+  --accent: 222 30% 15%;
+  --accent-foreground: 262 70% 75%;
+  --success: 152 76% 45%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 100%;
+  --destructive: 0 62.8% 45%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 222 30% 18%;
+  --input: 222 30% 18%;
+  --ring: 262 83% 65%;
+  --ai-bubble: 222 30% 12%;
+  --user-bubble: 262 83% 50%;
+  --sidebar-background: 222 47% 8%;
+  --sidebar-foreground: 210 40% 95%;
+  --sidebar-primary: 262 83% 65%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 222 30% 12%;
+  --sidebar-accent-foreground: 210 40% 95%;
+  --sidebar-border: 222 30% 16%;
+  --sidebar-ring: 262 83% 65%;
+}
+
+.medscribe-ui * {
+  border-color: hsl(var(--border));
+}
+
+.medscribe-ui {
+  font-family: "Inter", ui-sans-serif, sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+.medscribe-ui h1,
+.medscribe-ui h2,
+.medscribe-ui h3,
+.medscribe-ui h4,
+.medscribe-ui h5,
+.medscribe-ui h6 {
+  font-family: "Plus Jakarta Sans", ui-sans-serif, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.medscribe-ui .gradient-primary {
+  background: var(--gradient-primary);
+}
+
+.medscribe-ui .gradient-success {
+  background: var(--gradient-success);
+}
+
+.medscribe-ui .gradient-subtle {
+  background: var(--gradient-subtle);
+}
+
+.medscribe-ui .gradient-sidebar {
+  background: var(--gradient-sidebar);
+}
+
+.medscribe-ui .shadow-soft {
+  box-shadow: var(--shadow-soft);
+}
+
+.medscribe-ui .shadow-xs {
+  box-shadow: var(--shadow-xs);
+}
+
+.medscribe-ui .shadow-elevated {
+  box-shadow: var(--shadow-elevated);
+}
+
+.medscribe-ui .shadow-lg-custom {
+  box-shadow: var(--shadow-lg);
+}
+
+.medscribe-ui .shadow-card {
+  box-shadow: var(--shadow-card);
+}
+
+.medscribe-ui .shadow-card-hover {
+  box-shadow: var(--shadow-card-hover);
+}
+
+.medscribe-ui .shadow-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+.medscribe-ui .shadow-glow-success {
+  box-shadow: var(--shadow-glow-success);
+}
+
+.medscribe-ui .text-gradient {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.medscribe-ui .glass {
+  background: hsl(0 0% 100% / 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.medscribe-ui .scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.medscribe-ui .scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.medscribe-ui .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 999px;
+}
+
 
 h2 {
   font-size: 26px;

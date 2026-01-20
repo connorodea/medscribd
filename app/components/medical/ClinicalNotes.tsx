@@ -382,21 +382,21 @@ export default function ClinicalNotes() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Clinical Notes</h2>
+        <h2 className="text-lg font-semibold text-foreground">Clinical Notes</h2>
         <div className="flex items-center space-x-2">
           <div
             className={"h-3 w-3 rounded-full " + 
-              (isRecording && isActiveNote ? "bg-green-500 animate-pulse" : "bg-gray-300")
+              (isRecording && isActiveNote ? "bg-success animate-pulse" : "bg-muted")
             }
           />
-          <span className="text-sm text-gray-400">
+          <span className="text-sm text-muted-foreground">
             {isActiveNote ? (isRecording ? "Recording note..." : "Note started") : "Ready to start new note"}
           </span>
         </div>
       </div>
 
       <div className="space-y-4">
-        <div className="rounded-lg border border-gray-800 p-4">
+        <div className="rounded-lg border border-border bg-background p-4 shadow-card">
           <textarea
             ref={textareaRef}
             value={currentNote}
@@ -404,11 +404,11 @@ export default function ClinicalNotes() {
               setCurrentNote(e.target.value);
               adjustTextareaHeight();
             }}
-            className="w-full min-h-[200px] max-h-[600px] overflow-y-auto resize-none border-0 focus:ring-0 bg-gray-900 text-gray-200 placeholder-gray-500"
+            className="w-full min-h-[200px] max-h-[600px] overflow-y-auto resize-none border-0 bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0"
             placeholder={isActiveNote ? "Recording note... Start with patient name and visit date" : "Say 'Start note' to begin a new note..."}
           />
           <div className="flex justify-between mt-2">
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-muted-foreground">
               {isActiveNote ? "Note in progress..." : "No active note"}
             </div>
             <div className="space-x-2">
@@ -421,13 +421,13 @@ export default function ClinicalNotes() {
                     clinicalInfo: {},
                   });
                 }}
-                className="px-4 py-2 text-gray-400 hover:text-gray-200"
+                className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
               >
                 Clear
               </button>
               <button
                 onClick={handleSaveNote}
-                className="px-4 py-2 bg-gray-800 text-gray-200 rounded hover:bg-gray-700"
+                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
                 disabled={!isActiveNote}
               >
                 Save Note
@@ -438,14 +438,14 @@ export default function ClinicalNotes() {
 
         <div className="space-y-2">
           {notes.map((note) => (
-            <div key={note.id} className="rounded-lg border border-gray-800 p-4 bg-gray-900/50">
-              <div className="flex justify-between text-sm text-gray-500 mb-2">
+            <div key={note.id} className="rounded-lg border border-border bg-muted/30 p-4">
+              <div className="flex justify-between text-sm text-muted-foreground mb-2">
                 <span>{new Date(note.timestamp).toLocaleString()}</span>
                 <div className="flex items-center space-x-4">
                   <span>Last modified: {new Date(note.lastModified).toLocaleString()}</span>
                   <button
                     onClick={() => handleDeleteNote(note.id)}
-                    className="text-gray-500 hover:text-red-500 transition-colors"
+                    className="text-muted-foreground transition-colors hover:text-destructive"
                     title="Delete note"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -454,7 +454,7 @@ export default function ClinicalNotes() {
                   </button>
                 </div>
               </div>
-              <p className="whitespace-pre-wrap text-gray-200">{note.content}</p>
+              <p className="whitespace-pre-wrap text-foreground">{note.content}</p>
             </div>
           ))}
         </div>

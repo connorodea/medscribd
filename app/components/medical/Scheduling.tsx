@@ -256,83 +256,83 @@ export default function Scheduling() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Scheduling</h2>
+        <h2 className="text-lg font-semibold text-foreground">Scheduling</h2>
         <div className="flex items-center space-x-2">
           <div
             className={`h-3 w-3 rounded-full ${
-              isRecording && isActiveAppointment ? 'bg-green-500 animate-pulse' : 'bg-gray-300'
+              isRecording && isActiveAppointment ? 'bg-success animate-pulse' : 'bg-muted'
             }`}
           />
-          <span className="text-sm text-gray-400">
+          <span className="text-sm text-muted-foreground">
             {isActiveAppointment ? (isRecording ? "Recording appointment..." : "Appointment started") : "Ready to start new appointment"}
           </span>
         </div>
       </div>
 
       <div className="space-y-4">
-        <div className="rounded-lg border border-gray-800 p-4 bg-gray-900/50">
+        <div className="rounded-lg border border-border bg-background p-4 shadow-card">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">Patient Name</label>
+              <label className="block text-sm font-medium text-foreground">Patient Name</label>
               <input
                 type="text"
                 value={currentAppointment.patientName}
                 onChange={(e) => setCurrentAppointment(prev => ({ ...prev, patientName: e.target.value }))}
-                className="w-full px-3 py-2 bg-gray-800 rounded-md text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 placeholder="Enter patient name"
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">Medical Record Number (MRN)</label>
+              <label className="block text-sm font-medium text-foreground">Medical Record Number (MRN)</label>
               <input
                 type="text"
                 value={currentAppointment.mrn}
                 onChange={(e) => setCurrentAppointment(prev => ({ ...prev, mrn: e.target.value }))}
-                className="w-full px-3 py-2 bg-gray-800 rounded-md text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 placeholder="Enter MRN"
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">Type</label>
+              <label className="block text-sm font-medium text-foreground">Type</label>
               <input
                 type="text"
                 value={currentAppointment.type}
                 onChange={(e) => setCurrentAppointment(prev => ({ ...prev, type: e.target.value }))}
-                className="w-full px-3 py-2 bg-gray-800 rounded-md text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 placeholder="Enter appointment type"
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">Date & Time</label>
+              <label className="block text-sm font-medium text-foreground">Date & Time</label>
               <input
                 type="datetime-local"
                 value={currentAppointment.timestamp}
                 onChange={(e) => setCurrentAppointment(prev => ({ ...prev, timestamp: e.target.value }))}
-                className="w-full px-3 py-2 bg-gray-800 rounded-md text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">Duration (minutes)</label>
+              <label className="block text-sm font-medium text-foreground">Duration (minutes)</label>
               <input
                 type="number"
                 value={currentAppointment.duration}
                 onChange={(e) => setCurrentAppointment(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
-                className="w-full px-3 py-2 bg-gray-800 rounded-md text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">Notes</label>
+              <label className="block text-sm font-medium text-foreground">Notes</label>
               <input
                 type="text"
                 value={currentAppointment.notes}
                 onChange={(e) => setCurrentAppointment(prev => ({ ...prev, notes: e.target.value }))}
-                className="w-full px-3 py-2 bg-gray-800 rounded-md text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 placeholder="Enter any notes"
               />
             </div>
           </div>
           <div className="flex justify-between mt-4">
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-muted-foreground">
               {isActiveAppointment ? (isRecording ? "Recording appointment..." : "Appointment started") : "Say 'Start Scheduling' to begin"}
             </div>
             <div className="space-x-2">
@@ -341,17 +341,17 @@ export default function Scheduling() {
                     type: '',
                     timestamp: '',
                     duration: 30,
-                    notes: '',
+                  notes: '',
                   patientName: '',
                   mrn: '',
                 })}
-                className="px-4 py-2 text-gray-400 hover:text-gray-200"
+                className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
               >
                 Clear
               </button>
               <button
                 onClick={handleSchedule}
-                className="px-4 py-2 bg-gray-800 text-gray-200 rounded hover:bg-gray-700"
+                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
                 disabled={!isActiveAppointment}
               >
                 Schedule
@@ -362,21 +362,21 @@ export default function Scheduling() {
 
         <div className="space-y-2">
           {appointments.map((appointment) => (
-            <div key={appointment.id} className="rounded-lg border border-gray-800 p-4 bg-gray-900/50">
+            <div key={appointment.id} className="rounded-lg border border-border bg-muted/30 p-4">
               <div className="flex justify-between items-start">
                 <div>
                   <div className="mb-2">
-                    <h3 className="font-medium text-gray-200">{appointment.patientName}</h3>
+                    <h3 className="font-medium text-foreground">{appointment.patientName}</h3>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-gray-400">MRN: {appointment.mrn}</p>
-                    <p className="text-sm text-gray-400">Type: {appointment.type}</p>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-muted-foreground">MRN: {appointment.mrn}</p>
+                    <p className="text-sm text-muted-foreground">Type: {appointment.type}</p>
+                    <p className="text-sm text-muted-foreground">
                     Date: {new Date(appointment.timestamp).toLocaleString()}
                   </p>
-                    <p className="text-sm text-gray-400">Duration: {appointment.duration} minutes</p>
+                    <p className="text-sm text-muted-foreground">Duration: {appointment.duration} minutes</p>
                   {appointment.notes && (
-                      <p className="text-sm text-gray-400">Notes: {appointment.notes}</p>
+                      <p className="text-sm text-muted-foreground">Notes: {appointment.notes}</p>
                   )}
                   </div>
                 </div>
@@ -385,10 +385,10 @@ export default function Scheduling() {
                   <span
                     className={`px-2 py-1 text-xs rounded ${
                       appointment.status === 'completed'
-                          ? 'bg-green-900/50 text-green-200'
+                          ? 'bg-success/10 text-success'
                         : appointment.status === 'cancelled'
-                          ? 'bg-red-900/50 text-red-200'
-                          : 'bg-yellow-900/50 text-yellow-200'
+                          ? 'bg-destructive/10 text-destructive'
+                          : 'bg-warning/10 text-warning'
                     }`}
                   >
                     {appointment.status}
@@ -401,7 +401,7 @@ export default function Scheduling() {
                         e.target.value as 'scheduled' | 'completed' | 'cancelled'
                       )
                     }
-                      className="text-sm bg-gray-800 border-gray-700 rounded-md text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="rounded-md border border-border bg-background px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                   >
                     <option value="scheduled">Scheduled</option>
                     <option value="completed">Completed</option>
@@ -409,7 +409,7 @@ export default function Scheduling() {
                   </select>
                   <button
                     onClick={() => handleDelete(appointment.id)}
-                    className="text-gray-500 hover:text-red-500 transition-colors"
+                    className="text-muted-foreground transition-colors hover:text-destructive"
                     title="Delete appointment"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
