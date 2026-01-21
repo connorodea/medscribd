@@ -20,7 +20,7 @@ export function Hero() {
             </Badge>
             
             <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-              Let's take documentation off your to‑do list.
+              Let&apos;s take documentation off your to‑do list.
             </h1>
             
             <p className="mt-6 text-pretty text-lg leading-relaxed text-muted-foreground sm:text-xl">

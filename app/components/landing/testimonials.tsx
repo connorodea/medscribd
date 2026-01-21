@@ -49,7 +49,7 @@ export function Testimonials() {
                 ))}
               </div>
               <blockquote className="flex-1 text-foreground leading-relaxed">
-                "{testimonial.quote}"
+                &ldquo;{testimonial.quote}&rdquo;
               </blockquote>
               <div className="mt-6 border-t border-border pt-6">
                 <p className="font-semibold text-foreground">
