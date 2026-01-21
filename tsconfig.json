@@ -27,6 +27,11 @@
     "noImplicitOverride": true,
     "verbatimModuleSyntax": true,
     "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@/components/*": ["./app/components/*"],
+      "@/lib/*": ["./lib/*"]
+    },
     "jsx": "preserve",
     "plugins": [
       {
