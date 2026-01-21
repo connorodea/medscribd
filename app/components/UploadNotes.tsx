@@ -167,12 +167,15 @@ function TranscriptWithAudio({
     if (!substitutedWords.length || !result.audio_url) return -1;
     for (let i = 0; i < substitutedWords.length; i += 1) {
       const word = substitutedWords[i];
+      if (!word) continue;
       if (currentTime >= word.start && currentTime <= word.end) {
         return i;
       }
     }
     for (let i = substitutedWords.length - 1; i >= 0; i -= 1) {
-      if (currentTime >= substitutedWords[i].start) {
+      const word = substitutedWords[i];
+      if (!word) continue;
+      if (currentTime >= word.start) {
         return i;
       }
     }
