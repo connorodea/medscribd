@@ -137,6 +137,11 @@ function TranscriptWithAudio({
   substitutions: Substitution[];
 }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const activeWordRef = useRef<HTMLButtonElement | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
 
   const normalized = useMemo(
     () => normalizeSubstitutions(substitutions),
@@ -158,11 +163,71 @@ function TranscriptWithAudio({
     [substitutedWords],
   );
 
+  const activeWordIndex = useMemo(() => {
+    if (!substitutedWords.length || !result.audio_url) return -1;
+    for (let i = 0; i < substitutedWords.length; i += 1) {
+      const word = substitutedWords[i];
+      if (currentTime >= word.start && currentTime <= word.end) {
+        return i;
+      }
+    }
+    for (let i = substitutedWords.length - 1; i >= 0; i -= 1) {
+      if (currentTime >= substitutedWords[i].start) {
+        return i;
+      }
+    }
+    return -1;
+  }, [currentTime, substitutedWords, result.audio_url]);
+
+  const activeWord =
+    activeWordIndex >= 0 ? substitutedWords[activeWordIndex] : null;
+
   const handleSeek = (time: number) => {
     if (!audioRef.current) return;
     audioRef.current.currentTime = time;
     audioRef.current.play().catch(() => undefined);
   };
+
+  const handleTogglePlay = () => {
+    if (!audioRef.current) return;
+    if (audioRef.current.paused) {
+      audioRef.current.play().catch(() => undefined);
+    } else {
+      audioRef.current.pause();
+    }
+  };
+
+  const handleSkip = (delta: number) => {
+    if (!audioRef.current) return;
+    const nextTime = Math.min(
+      Math.max(audioRef.current.currentTime + delta, 0),
+      duration || audioRef.current.duration || 0,
+    );
+    audioRef.current.currentTime = nextTime;
+    setCurrentTime(nextTime);
+  };
+
+  const handleScrub = (value: number) => {
+    if (!audioRef.current) return;
+    audioRef.current.currentTime = value;
+    setCurrentTime(value);
+  };
+
+  useEffect(() => {
+    if (!audioRef.current) return;
+    audioRef.current.playbackRate = playbackRate;
+  }, [playbackRate]);
+
+  useEffect(() => {
+    if (!activeWordRef.current) return;
+    activeWordRef.current.scrollIntoView({
+      block: "nearest",
+      inline: "start",
+      behavior: "smooth",
+    });
+  }, [activeWordIndex]);
+
+  const remaining = Math.max(duration - currentTime, 0);
 
   return (
     <div className="rounded-lg border border-border bg-muted/20 p-4">
@@ -175,23 +240,109 @@ function TranscriptWithAudio({
         )}
       </div>
       {result.audio_url && (
-        <audio
-          ref={audioRef}
-          controls
-          src={result.audio_url || undefined}
-          className="mt-3 w-full"
-        />
+        <div className="mt-3 space-y-3">
+          <audio
+            ref={audioRef}
+            src={result.audio_url || undefined}
+            onTimeUpdate={(event) =>
+              setCurrentTime((event.target as HTMLAudioElement).currentTime)
+            }
+            onLoadedMetadata={(event) =>
+              setDuration((event.target as HTMLAudioElement).duration || 0)
+            }
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onEnded={() => setIsPlaying(false)}
+            preload="metadata"
+          />
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => handleSkip(-10)}
+              className="rounded-full border border-border bg-background px-3 py-1 text-xs text-foreground transition-colors hover:border-primary/40"
+            >
+              -10s
+            </button>
+            <button
+              type="button"
+              onClick={handleTogglePlay}
+              className="rounded-full bg-primary px-4 py-1 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              {isPlaying ? "Pause" : "Play"}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSkip(10)}
+              className="rounded-full border border-border bg-background px-3 py-1 text-xs text-foreground transition-colors hover:border-primary/40"
+            >
+              +10s
+            </button>
+            <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+              <span>{formatTimestamp(currentTime)}</span>
+              <span>/</span>
+              <span>{formatTimestamp(duration || 0)}</span>
+              <span className="text-muted-foreground/70">
+                (-{formatTimestamp(remaining)})
+              </span>
+            </div>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={duration || 0}
+            step={0.01}
+            value={Math.min(currentTime, duration || 0)}
+            onChange={(event) => handleScrub(Number(event.target.value))}
+            className="w-full accent-primary"
+          />
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <div>
+              Now playing:{" "}
+              <span className="text-foreground font-semibold">
+                {activeWord ? activeWord.punctuated_word || activeWord.word : "—"}
+              </span>
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+              {[1, 2, 3].map((rate) => (
+                <button
+                  key={rate}
+                  type="button"
+                  onClick={() => setPlaybackRate(rate)}
+                  className={`rounded-full border px-3 py-1 transition-colors ${
+                    playbackRate === rate
+                      ? "border-primary/40 bg-primary/10 text-primary"
+                      : "border-border bg-background text-foreground hover:border-primary/40"
+                  }`}
+                >
+                  {rate}x
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
       {substitutedWords.length > 0 ? (
         <div className="mt-3 max-h-64 space-y-3 overflow-auto text-xs text-muted-foreground scrollbar-thin">
           {transcriptLines.map((line, lineIndex) => (
             <div key={`line-${lineIndex}`} className="leading-relaxed">
+              <span className="mr-2 text-[10px] uppercase tracking-wide text-muted-foreground/70">
+                {formatTimestamp(line[0]?.start || 0)}
+              </span>
               {line.map((word, index) => (
                 <button
                   key={`${word.word}-${index}-${word.start}`}
                   type="button"
                   onClick={() => handleSeek(word.start)}
-                  className="inline-flex items-center rounded px-1 py-0.5 text-foreground/80 transition-colors hover:text-foreground"
+                  ref={
+                    activeWord?.start === word.start && activeWord?.end === word.end
+                      ? activeWordRef
+                      : undefined
+                  }
+                  className={`inline-flex items-center rounded px-1 py-0.5 transition-colors ${
+                    activeWord?.start === word.start && activeWord?.end === word.end
+                      ? "bg-primary/15 text-foreground"
+                      : "text-foreground/80 hover:text-foreground"
+                  }`}
                   title={formatTimestamp(word.start)}
                 >
                   {word.punctuated_word || word.word}
