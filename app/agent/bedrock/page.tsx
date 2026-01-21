@@ -7,7 +7,6 @@ import {
   useVoiceBot,
 } from "../../context/VoiceBotContextProvider";
 import MedicalTranscription from "../../components/medical/MedicalTranscription";
-import VoiceSelector from "../../components/VoiceSelector/VoiceSelector";
 import { isMobile } from "react-device-detect";
 import MobileMenu from "../../components/MobileMenu";
 import ThemeToggle from "../../components/ThemeToggle";
@@ -46,7 +45,6 @@ export default function PreviewHome() {
             <ThemeToggle />
             <ProviderToggleButton />
             <Suspense fallback={<div>Loading...</div>}>
-              <VoiceSelector />
               {isMobile && <MobileMenu />}
             </Suspense>
             <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-primary text-xs font-bold text-primary-foreground shadow-soft">
