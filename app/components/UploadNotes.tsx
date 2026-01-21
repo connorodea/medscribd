@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 
 type UploadedFile = {
   name: string;
@@ -22,8 +22,17 @@ type CodeSuggestion = {
   confidence: "low" | "medium" | "high";
 };
 
+type TranscriptWord = {
+  word: string;
+  punctuated_word?: string;
+  start: number;
+  end: number;
+};
+
 type ProcessResult = {
   transcript: string;
+  word_timestamps?: TranscriptWord[];
+  audio_url?: string | null;
   soap: SoapNote | null;
   clinical_note?: string;
   verification_needed?: string[];
@@ -31,6 +40,11 @@ type ProcessResult = {
   cpt: CodeSuggestion[];
   warning?: string | null;
   error?: string | null;
+};
+
+type Substitution = {
+  from: string;
+  to: string;
 };
 
 const templates = [
@@ -41,11 +55,160 @@ const templates = [
   { id: "physical_therapy", label: "Physical Therapy" },
 ] as const;
 
+const substitutionStorageKey = "medscribd_substitutions";
+
 const formatBytes = (value: number) => {
   if (value < 1024) return `${value} B`;
   if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
   return `${(value / (1024 * 1024)).toFixed(1)} MB`;
 };
+
+const formatTimestamp = (seconds: number) => {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+};
+
+const escapeRegExp = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const normalizeSubstitutions = (substitutions: Substitution[]) =>
+  substitutions
+    .map((entry) => ({
+      from: entry.from.trim(),
+      to: entry.to.trim(),
+    }))
+    .filter((entry) => entry.from && entry.to);
+
+const applySubstitutionsToText = (text: string, substitutions: Substitution[]) => {
+  let updated = text;
+  substitutions.forEach((entry) => {
+    const pattern = new RegExp(`\\b${escapeRegExp(entry.from)}\\b`, "gi");
+    updated = updated.replace(pattern, entry.to);
+  });
+  return updated;
+};
+
+const applySubstitutionsToWords = (words: TranscriptWord[], substitutions: Substitution[]) => {
+  if (!words.length || !substitutions.length) return words;
+  return words.map((word) => {
+    const match = substitutions.find(
+      (entry) => entry.from.toLowerCase() === word.word.toLowerCase(),
+    );
+    if (!match) return word;
+    return {
+      ...word,
+      word: match.to,
+      punctuated_word: word.punctuated_word
+        ? word.punctuated_word.replace(
+            new RegExp(escapeRegExp(word.word), "i"),
+            match.to,
+          )
+        : word.punctuated_word,
+    };
+  });
+};
+
+const buildTranscriptLines = (words: TranscriptWord[]) => {
+  const lines: TranscriptWord[][] = [];
+  let currentLine: TranscriptWord[] = [];
+
+  words.forEach((word) => {
+    currentLine.push(word);
+    const punctuated = word.punctuated_word || word.word;
+    if (/[.!?]$/.test(punctuated)) {
+      lines.push(currentLine);
+      currentLine = [];
+    }
+  });
+
+  if (currentLine.length) {
+    lines.push(currentLine);
+  }
+
+  return lines;
+};
+
+function TranscriptWithAudio({
+  result,
+  substitutions,
+}: {
+  result: ProcessResult;
+  substitutions: Substitution[];
+}) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const normalized = useMemo(
+    () => normalizeSubstitutions(substitutions),
+    [substitutions],
+  );
+
+  const substitutedWords = useMemo(
+    () => applySubstitutionsToWords(result.word_timestamps || [], normalized),
+    [result.word_timestamps, normalized],
+  );
+
+  const substitutedTranscript = useMemo(
+    () => applySubstitutionsToText(result.transcript || "", normalized),
+    [result.transcript, normalized],
+  );
+
+  const transcriptLines = useMemo(
+    () => buildTranscriptLines(substitutedWords),
+    [substitutedWords],
+  );
+
+  const handleSeek = (time: number) => {
+    if (!audioRef.current) return;
+    audioRef.current.currentTime = time;
+    audioRef.current.play().catch(() => undefined);
+  };
+
+  return (
+    <div className="rounded-lg border border-border bg-muted/20 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="text-foreground font-semibold">Transcript</div>
+        {result.audio_url && (
+          <div className="text-xs text-muted-foreground">
+            Click a word to jump to that time.
+          </div>
+        )}
+      </div>
+      {result.audio_url && (
+        <audio
+          ref={audioRef}
+          controls
+          src={result.audio_url || undefined}
+          className="mt-3 w-full"
+        />
+      )}
+      {substitutedWords.length > 0 ? (
+        <div className="mt-3 max-h-64 space-y-3 overflow-auto text-xs text-muted-foreground scrollbar-thin">
+          {transcriptLines.map((line, lineIndex) => (
+            <div key={`line-${lineIndex}`} className="leading-relaxed">
+              {line.map((word, index) => (
+                <button
+                  key={`${word.word}-${index}-${word.start}`}
+                  type="button"
+                  onClick={() => handleSeek(word.start)}
+                  className="inline-flex items-center rounded px-1 py-0.5 text-foreground/80 transition-colors hover:text-foreground"
+                  title={formatTimestamp(word.start)}
+                >
+                  {word.punctuated_word || word.word}
+                  {" "}
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <pre className="mt-3 whitespace-pre-wrap text-xs text-muted-foreground">
+          {substitutedTranscript || "Transcript will appear here."}
+        </pre>
+      )}
+    </div>
+  );
+}
 
 export default function UploadNotes() {
   const [isUploading, setIsUploading] = useState(false);
@@ -56,6 +219,38 @@ export default function UploadNotes() {
   const [noteType, setNoteType] = useState("SOAP Note");
   const [processing, setProcessing] = useState<Record<string, boolean>>({});
   const [results, setResults] = useState<Record<string, ProcessResult>>({});
+  const [substitutions, setSubstitutions] = useState<Substitution[]>([]);
+  const [newFrom, setNewFrom] = useState("");
+  const [newTo, setNewTo] = useState("");
+
+  useEffect(() => {
+    const stored = localStorage.getItem(substitutionStorageKey);
+    if (stored) {
+      try {
+        setSubstitutions(JSON.parse(stored) as Substitution[]);
+      } catch (error) {
+        console.error("Failed to parse substitutions:", error);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(substitutionStorageKey, JSON.stringify(substitutions));
+  }, [substitutions]);
+
+  const handleAddSubstitution = () => {
+    if (!newFrom.trim() || !newTo.trim()) return;
+    setSubstitutions((prev) => [
+      { from: newFrom.trim(), to: newTo.trim() },
+      ...prev,
+    ]);
+    setNewFrom("");
+    setNewTo("");
+  };
+
+  const handleRemoveSubstitution = (index: number) => {
+    setSubstitutions((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleExport = async (result: ProcessResult, format: "pdf" | "docx" | "md") => {
     if (!result.clinical_note) {
@@ -135,6 +330,7 @@ export default function UploadNotes() {
           templateId: selectedTemplate,
           patientContext,
           noteType,
+          substitutions: normalizeSubstitutions(substitutions),
         }),
       });
       if (!response.ok) {
@@ -190,6 +386,57 @@ export default function UploadNotes() {
           />
           {isUploading ? "Uploading..." : "Upload files"}
         </label>
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-border bg-muted/30 p-4">
+        <div className="text-sm font-semibold text-foreground">Word substitutions</div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Save common replacements (e.g. MD → doctor). Substitutions are applied before note generation.
+        </p>
+        <div className="mt-3 grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+          <input
+            type="text"
+            value={newFrom}
+            onChange={(event) => setNewFrom(event.target.value)}
+            placeholder="From (e.g., MD)"
+            className="rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground"
+          />
+          <input
+            type="text"
+            value={newTo}
+            onChange={(event) => setNewTo(event.target.value)}
+            placeholder="To (e.g., doctor)"
+            className="rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground"
+          />
+          <button
+            type="button"
+            onClick={handleAddSubstitution}
+            className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Add
+          </button>
+        </div>
+        {substitutions.length > 0 && (
+          <div className="mt-3 space-y-2 text-xs text-muted-foreground">
+            {substitutions.map((entry, index) => (
+              <div
+                key={`${entry.from}-${entry.to}-${index}`}
+                className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2"
+              >
+                <div>
+                  <span className="text-foreground font-semibold">{entry.from}</span> → {entry.to}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveSubstitution(index)}
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_1fr]">
@@ -256,6 +503,7 @@ export default function UploadNotes() {
                         {result.error}
                       </div>
                     )}
+                    <TranscriptWithAudio result={result} substitutions={substitutions} />
                     <div className="rounded-lg border border-border bg-background p-3">
                       <div className="text-foreground font-semibold">Clinical Note</div>
                       {result.clinical_note ? (

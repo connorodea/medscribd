@@ -17,6 +17,13 @@ type CodeSuggestion = {
   confidence: "low" | "medium" | "high";
 };
 
+type TranscriptWord = {
+  word: string;
+  punctuated_word?: string;
+  start: number;
+  end: number;
+};
+
 const getUploadDir = () =>
   process.env.UPLOAD_DIR || path.join(process.cwd(), "uploads");
 
@@ -166,7 +173,7 @@ const transcribeAudio = async (audioBuffer: Buffer) => {
   }
 
   const response = await fetch(
-    "https://api.deepgram.com/v1/listen?model=nova-3-medical&punctuate=true&paragraphs=true",
+    "https://api.deepgram.com/v1/listen?model=nova-3-medical&punctuate=true&paragraphs=true&words=true",
     {
       method: "POST",
       headers: {
@@ -183,7 +190,11 @@ const transcribeAudio = async (audioBuffer: Buffer) => {
   }
 
   const data = await response.json();
-  return data?.results?.channels?.[0]?.alternatives?.[0]?.transcript || "";
+  const alternative = data?.results?.channels?.[0]?.alternatives?.[0];
+  return {
+    transcript: alternative?.transcript || "",
+    words: (alternative?.words || []) as TranscriptWord[],
+  };
 };
 
 const tryParseJson = (input: string) => {
@@ -409,15 +420,65 @@ const runNoteGeneration = async (
   return runOpenAi(transcript, patientContext, noteType);
 };
 
+const normalizeSubstitutions = (
+  substitutions?: Array<{ from?: string; to?: string }>,
+) =>
+  (substitutions || [])
+    .map((entry) => ({
+      from: (entry.from || "").trim(),
+      to: (entry.to || "").trim(),
+    }))
+    .filter((entry) => entry.from && entry.to);
+
+const escapeRegExp = (value: string) =>
+  value.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&");
+
+const applySubstitutionsToText = (
+  text: string,
+  substitutions: Array<{ from: string; to: string }>,
+) => {
+  let updated = text;
+  substitutions.forEach((entry) => {
+    const pattern = new RegExp(`\\\\b${escapeRegExp(entry.from)}\\\\b`, "gi");
+    updated = updated.replace(pattern, entry.to);
+  });
+  return updated;
+};
+
+const applySubstitutionsToWords = (
+  words: TranscriptWord[],
+  substitutions: Array<{ from: string; to: string }>,
+) => {
+  if (!words.length || !substitutions.length) return words;
+  return words.map((word) => {
+    const match = substitutions.find(
+      (entry) => entry.from.toLowerCase() === word.word.toLowerCase(),
+    );
+    if (!match) return word;
+    const punctuated = word.punctuated_word
+      ? word.punctuated_word.replace(
+          new RegExp(escapeRegExp(word.word), "i"),
+          match.to,
+        )
+      : undefined;
+    return {
+      ...word,
+      word: match.to,
+      punctuated_word: punctuated,
+    };
+  });
+};
+
 export async function POST(request: NextRequest) {
   try {
-    const { storedAs, templateId, provider, patientContext, noteType } =
+    const { storedAs, templateId, provider, patientContext, noteType, substitutions } =
       (await request.json()) as {
         storedAs?: string;
         templateId?: string;
         provider?: string;
         patientContext?: string;
         noteType?: string;
+        substitutions?: Array<{ from?: string; to?: string }>;
       };
 
     if (!storedAs) {
@@ -430,18 +491,27 @@ export async function POST(request: NextRequest) {
 
     const fileBuffer = await readFile(filePath);
     let transcript = "";
+    let wordTimestamps: TranscriptWord[] = [];
 
     if ([".txt", ".md"].includes(ext)) {
       transcript = fileBuffer.toString("utf-8");
     } else if (
       [".wav", ".mp3", ".m4a", ".ogg", ".webm", ".flac", ".aac"].includes(ext)
     ) {
-      transcript = await transcribeAudio(fileBuffer);
+      const transcription = await transcribeAudio(fileBuffer);
+      transcript = transcription.transcript;
+      wordTimestamps = transcription.words || [];
     } else {
       return NextResponse.json(
         { error: "Unsupported file type. Upload audio or text files." },
         { status: 400 },
       );
+    }
+
+    const normalizedSubstitutions = normalizeSubstitutions(substitutions);
+    if (normalizedSubstitutions.length) {
+      transcript = applySubstitutionsToText(transcript, normalizedSubstitutions);
+      wordTimestamps = applySubstitutionsToWords(wordTimestamps, normalizedSubstitutions);
     }
 
     const templateKey = (templateId && templateId in templates
@@ -458,6 +528,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       transcript,
+      word_timestamps: wordTimestamps,
+      audio_url: [".wav", ".mp3", ".m4a", ".ogg", ".webm", ".flac", ".aac"].includes(ext)
+        ? `/api/uploads/${storedAs}`
+        : null,
       soap: generated.soap,
       clinical_note: generated.clinical_note,
       verification_needed: generated.verification_needed,
