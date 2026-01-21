@@ -1,139 +1,176 @@
 "use client";
-import { Suspense } from "react";
-import { App } from "../components/App";
-import { stsConfig } from "../lib/constants";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AgentHeader } from "@/components/agent/agent-header";
+import { VisitsPanel, type Visit } from "@/components/agent/visits-panel";
+import { EncounterPanel } from "@/components/agent/encounter-panel";
+import { ClinicalNotePanel } from "@/components/agent/clinical-note-panel";
+import { App } from "@/app/components/App";
+import UploadNotes from "@/app/components/UploadNotes";
+import MedicalTranscription from "@/app/components/medical/MedicalTranscription";
+import { stsConfig } from "@/app/lib/constants";
 import {
   isConversationMessage,
   useVoiceBot,
-} from "../context/VoiceBotContextProvider";
-import MedicalTranscription from "../components/medical/MedicalTranscription";
-import { isMobile } from "react-device-detect";
-import MobileMenu from "../components/MobileMenu";
-import UploadNotes from "../components/UploadNotes";
-import ThemeToggle from "../components/ThemeToggle";
+  VoiceBotStatus,
+} from "@/app/context/VoiceBotContextProvider";
 
-const ProviderToggleButton = () => {
-  return (
-    <a
-      href="/agent/bedrock"
-      className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors text-gray-400 hover:text-gray-200 hover:bg-gray-800"
-    >
-      <span>Bedrock</span>
-    </a>
+interface TranscriptEntry {
+  id: string;
+  speaker: "clinician" | "patient";
+  text: string;
+  timestamp: string;
+}
+
+const initialVisits: Visit[] = [
+  {
+    id: "current",
+    patientName: "New Patient",
+    status: "recording",
+    time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    date: "Today",
+    chiefComplaint: "",
+  },
+];
+
+const formatTimestamp = () =>
+  new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+export default function AgentPage() {
+  const { status, messages, startListening, startSleeping } = useVoiceBot();
+  const [visits, setVisits] = useState<Visit[]>(initialVisits);
+  const [selectedVisitId, setSelectedVisitId] = useState<string | null>(
+    initialVisits[0]?.id || null,
   );
-};
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
+  const processedCountRef = useRef(0);
 
-export default function Home() {
-  const { messages } = useVoiceBot();
-  const conversation = messages.filter(isConversationMessage);
+  const isRecording = status === VoiceBotStatus.LISTENING;
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | undefined;
+    if (isRecording) {
+      interval = setInterval(() => {
+        setRecordingDuration((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRecording]);
+
+  useEffect(() => {
+    const conversation = messages.filter(isConversationMessage);
+    if (conversation.length <= processedCountRef.current) return;
+
+    const newEntries = conversation
+      .slice(processedCountRef.current)
+      .map((message, index) => ({
+        id: `${Date.now()}-${index}`,
+        speaker: ("user" in message ? "patient" : "clinician") as
+          | "patient"
+          | "clinician",
+        text: "user" in message ? message.user : message.assistant,
+        timestamp: formatTimestamp(),
+      }));
+
+    processedCountRef.current = conversation.length;
+    setTranscript((prev) => [...prev, ...newEntries]);
+  }, [messages]);
+
+  const selectedVisit = useMemo(
+    () => visits.find((visit) => visit.id === selectedVisitId) || null,
+    [visits, selectedVisitId],
+  );
+
+  const handleNewVisit = useCallback(() => {
+    const newVisit: Visit = {
+      id: Date.now().toString(),
+      patientName: "New Patient",
+      status: "scheduled",
+      time: formatTimestamp(),
+      date: "Today",
+      chiefComplaint: "",
+    };
+    setVisits((prev) => [newVisit, ...prev]);
+    setSelectedVisitId(newVisit.id);
+    setTranscript([]);
+    setRecordingDuration(0);
+  }, []);
+
+  const handleSelectVisit = useCallback((id: string) => {
+    setSelectedVisitId(id);
+  }, []);
+
+  const handleStartRecording = useCallback(() => {
+    setRecordingDuration(0);
+    startListening(true);
+    if (selectedVisitId) {
+      setVisits((prev) =>
+        prev.map((visit) =>
+          visit.id === selectedVisitId
+            ? { ...visit, status: "recording" }
+            : visit,
+        ),
+      );
+    }
+  }, [selectedVisitId, startListening]);
+
+  const handleStopRecording = useCallback(() => {
+    startSleeping();
+    if (selectedVisitId) {
+      setVisits((prev) =>
+        prev.map((visit) =>
+          visit.id === selectedVisitId
+            ? { ...visit, status: "processing" }
+            : visit,
+        ),
+      );
+      setTimeout(() => {
+        setVisits((prev) =>
+          prev.map((visit) =>
+            visit.id === selectedVisitId
+              ? { ...visit, status: "done" }
+              : visit,
+          ),
+        );
+      }, 1500);
+    }
+  }, [selectedVisitId, startSleeping]);
 
   return (
-    <main className="medscribe-ui min-h-screen bg-background text-foreground">
-      <div className="mx-auto w-full max-w-screen-2xl px-4 py-6 lg:px-8">
-        <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border bg-background/95 px-6 backdrop-blur">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-primary text-primary-foreground shadow-soft">
-                <span className="text-sm font-bold">MS</span>
-              </div>
-              <span className="font-display text-lg font-bold text-foreground">MedScribd</span>
-            </div>
-            <div className="hidden items-center gap-1.5 rounded-full border border-success/20 bg-success/10 px-3 py-1.5 text-xs font-semibold text-success sm:flex">
-              HIPAA
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <ProviderToggleButton />
-            <Suspense fallback={<div>Loading...</div>}>
-              {isMobile && <MobileMenu />}
-            </Suspense>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-primary text-xs font-bold text-primary-foreground shadow-soft">
-              DR
-            </div>
-          </div>
-        </header>
+    <div className="medscribe-ui flex h-screen flex-col bg-background">
+      <AgentHeader />
 
-        <div className="mt-6 grid h-[calc(100vh-112px)] gap-6 lg:grid-cols-[260px_minmax(0,1fr)_420px]">
-          <aside className="rounded-2xl border border-border gradient-sidebar shadow-card">
-            <div className="border-b border-border p-4">
-              <button className="w-full rounded-xl gradient-primary py-2 text-sm font-semibold text-primary-foreground shadow-soft">
-                + New Visit
-              </button>
-            </div>
-            <div className="border-b border-border px-4 py-3 text-xs font-medium text-muted-foreground">
-              Today
-            </div>
-            <div className="space-y-3 p-3">
-              <button className="w-full rounded-xl border border-primary/20 bg-background px-3 py-3 text-left shadow-card-hover">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
-                    JS
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-foreground">John Smith</div>
-                    <div className="text-xs text-muted-foreground">Today · 09:31 PM</div>
-                  </div>
-                </div>
-                <div className="mt-3 inline-flex items-center rounded-md border border-success/20 bg-success/10 px-2 py-1 text-[10px] font-medium text-success">
-                  Completed
-                </div>
-              </button>
-            </div>
-          </aside>
+      <div className="flex flex-1 overflow-hidden">
+        <VisitsPanel
+          visits={visits}
+          selectedVisitId={selectedVisitId}
+          onSelectVisit={handleSelectVisit}
+          onNewVisit={handleNewVisit}
+        />
 
-          <section className="flex flex-col gap-6 overflow-hidden">
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-semibold text-foreground">John Smith</div>
-                  <div className="text-xs text-muted-foreground">Duration: 14m 7s</div>
-                </div>
-                <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                  Visit in progress
-                </span>
-              </div>
-              <div className="mt-4 rounded-xl border border-border bg-muted/40 p-4">
-                <Suspense fallback={<div>Loading...</div>}>
-                  <App
-                    defaultStsConfig={stsConfig}
-                    className="flex-shrink-0 h-[140px] opacity-75 disabled:opacity-50"
-                    requiresUserActionToInitialize={isMobile}
-                  />
-                </Suspense>
-              </div>
-            </div>
+        <EncounterPanel
+          visit={selectedVisit}
+          isRecording={isRecording}
+          recordingDuration={recordingDuration}
+          onStartRecording={handleStartRecording}
+          onStopRecording={handleStopRecording}
+          transcript={transcript}
+          recordingContent={
+            <App
+              defaultStsConfig={stsConfig}
+              className="flex-shrink-0 h-[140px] opacity-75 disabled:opacity-50"
+            />
+          }
+          uploadContent={<UploadNotes />}
+        />
 
-            <div className="flex-1 rounded-2xl border border-border bg-card p-5 shadow-card">
-              <div className="text-sm font-semibold text-foreground">Transcript</div>
-              <div className="mt-3 h-[260px] space-y-3 overflow-auto text-xs text-muted-foreground scrollbar-thin">
-                {conversation.length === 0 && (
-                  <div className="text-muted-foreground/70">Conversation will appear here.</div>
-                )}
-                {conversation.map((msg, index) => (
-                  <div key={`${index}`} className="leading-relaxed text-foreground/80">
-                    {"user" in msg ? `Patient: ${msg.user}` : `Clinician: ${msg.assistant}`}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <UploadNotes />
-          </section>
-
-          <aside className="rounded-2xl border border-border bg-card p-5 shadow-card">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-semibold text-foreground">Clinical Note</div>
-              <div className="text-xs text-muted-foreground">Last updated just now</div>
-            </div>
-            <div className="mt-4">
-              <Suspense fallback={<div>Loading...</div>}>
-                <MedicalTranscription />
-              </Suspense>
-            </div>
-          </aside>
-        </div>
+        <ClinicalNotePanel visit={selectedVisit}>
+          <MedicalTranscription />
+        </ClinicalNotePanel>
       </div>
-    </main>
+    </div>
   );
 }
