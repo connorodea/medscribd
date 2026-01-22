@@ -97,7 +97,7 @@ export function AudioController({
   }, [])
 
   const handleSeek = useCallback((value: number[]) => {
-    setCurrentTime(value[0])
+    setCurrentTime(value[0] ?? 0)
   }, [])
 
   const handleSkipBackward = useCallback(() => {
