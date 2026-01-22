@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { Camera, Mail, Phone, Building2, CreditCard, Award, Save } from "lucide-react"
+import { Camera, Mail, Building2, CreditCard, Award, Save } from "lucide-react"
 
 interface ProfileSheetProps {
   open: boolean

@@ -169,12 +169,6 @@ export function EncounterPanel({
     }
   }
 
-  const formatTranscriptText = () => {
-    return transcript.map(entry => 
-      `[${entry.speaker === "clinician" ? "Clinician" : "Patient"}] ${entry.text}`
-    ).join("\n\n")
-  }
-
   const handleExportMarkdown = () => {
     if (!visit || transcript.length === 0) return
     const content = `# Visit Transcript - ${visit.patientName}\n\n**Date:** ${visit.date} at ${visit.time}\n**Chief Complaint:** ${visit.chiefComplaint}\n\n---\n\n${transcript.map(entry => 
