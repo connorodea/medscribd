@@ -83,10 +83,9 @@ export function VisitsPanel({
 
   const groupedVisits = filteredVisits.reduce(
     (acc, visit) => {
-      if (!acc[visit.date]) {
-        acc[visit.date] = [];
-      }
-      acc[visit.date].push(visit);
+      const bucket = acc[visit.date] ?? [];
+      bucket.push(visit);
+      acc[visit.date] = bucket;
       return acc;
     },
     {} as Record<string, Visit[]>,
