@@ -109,8 +109,9 @@ export function AudioController({
   }, [duration])
 
   const handleVolumeChange = useCallback((value: number[]) => {
-    setVolume(value[0])
-    if (value[0] > 0) {
+    const nextVolume = value[0] ?? 0
+    setVolume(nextVolume)
+    if (nextVolume > 0) {
       setIsMuted(false)
     }
   }, [])
